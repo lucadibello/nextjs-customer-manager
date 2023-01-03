@@ -1,1 +1,3 @@
-# nextjs-customer-manager
+# NextJS customer manager
+
+Work in progress... 
