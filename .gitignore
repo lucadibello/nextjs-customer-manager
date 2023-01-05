@@ -37,3 +37,8 @@ next-env.d.ts
 
 # Sentry
 .sentryclirc
+
+# NextJS PWA
+**/public/workbox-*.js
+**/public/sw.js
+**/public/fallback-*.js
