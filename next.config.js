@@ -6,7 +6,10 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 const { withSentryConfig } = require('@sentry/nextjs');
 const withPWA = require('next-pwa')({
-  dest: 'public'
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  // FIXME: disable: process.env.NODE_ENV === 'development'
 })
 
 /** @type {import('next').NextConfig} */
