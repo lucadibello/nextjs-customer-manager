@@ -17,6 +17,12 @@ export const config = {
    * - api (API routes)
    * - _next/static (static files)
    * - favicon.ico (favicon file)
+   * - /images (images folder)
+   * - sw.js (service worker file)
+   * - sw.js.map (service worker file)
+   * - workbox-<hash>.js (workbox file)
+   * - workbox-<hash>.js.map (workbox file)
+   * - manifest.json (manifest file)
    */
-  matcher: '/((?!api|_next/static|favicon.ico).*)',
+  matcher: '/((?!api|_next/static|favicon.ico|icons/*|sw.js|sw.js.map|workbox-327c579b.js|manifest.json).*)',
 }
