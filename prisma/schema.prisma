@@ -1,14 +1,150 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = "native"
+model Album {
+  AlbumId  Int     @id(map: "PK_Album")
+  Title    String  @db.VarChar(160)
+  ArtistId Int
+  Artist   Artist  @relation(fields: [ArtistId], references: [ArtistId], onDelete: NoAction, onUpdate: NoAction, map: "FK_AlbumArtistId")
+  Track    Track[]
+
+  @@index([ArtistId], map: "IFK_AlbumArtistId")
 }
 
-// Create enum for user role
+model Artist {
+  ArtistId Int     @id(map: "PK_Artist")
+  Name     String? @db.VarChar(120)
+  Album    Album[]
+}
+
+model Customer {
+  CustomerId   Int       @id(map: "PK_Customer")
+  FirstName    String    @db.VarChar(40)
+  LastName     String    @db.VarChar(20)
+  Company      String?   @db.VarChar(80)
+  Address      String?   @db.VarChar(70)
+  City         String?   @db.VarChar(40)
+  State        String?   @db.VarChar(40)
+  Country      String?   @db.VarChar(40)
+  PostalCode   String?   @db.VarChar(10)
+  Phone        String?   @db.VarChar(24)
+  Fax          String?   @db.VarChar(24)
+  Email        String    @db.VarChar(60)
+  SupportRepId Int?
+  Employee     Employee? @relation(fields: [SupportRepId], references: [EmployeeId], onDelete: NoAction, onUpdate: NoAction, map: "FK_CustomerSupportRepId")
+  Invoice      Invoice[]
+
+  @@index([SupportRepId], map: "IFK_CustomerSupportRepId")
+}
+
+model Employee {
+  EmployeeId     Int        @id(map: "PK_Employee")
+  LastName       String     @db.VarChar(20)
+  FirstName      String     @db.VarChar(20)
+  Title          String?    @db.VarChar(30)
+  ReportsTo      Int?
+  BirthDate      DateTime?  @db.Timestamp(6)
+  HireDate       DateTime?  @db.Timestamp(6)
+  Address        String?    @db.VarChar(70)
+  City           String?    @db.VarChar(40)
+  State          String?    @db.VarChar(40)
+  Country        String?    @db.VarChar(40)
+  PostalCode     String?    @db.VarChar(10)
+  Phone          String?    @db.VarChar(24)
+  Fax            String?    @db.VarChar(24)
+  Email          String?    @db.VarChar(60)
+  Employee       Employee?  @relation("EmployeeToEmployee", fields: [ReportsTo], references: [EmployeeId], onDelete: NoAction, onUpdate: NoAction, map: "FK_EmployeeReportsTo")
+  Customer       Customer[]
+  other_Employee Employee[] @relation("EmployeeToEmployee")
+
+  @@index([ReportsTo], map: "IFK_EmployeeReportsTo")
+}
+
+model Genre {
+  GenreId Int     @id(map: "PK_Genre")
+  Name    String? @db.VarChar(120)
+  Track   Track[]
+}
+
+model Invoice {
+  InvoiceId         Int           @id(map: "PK_Invoice")
+  CustomerId        Int
+  InvoiceDate       DateTime      @db.Timestamp(6)
+  BillingAddress    String?       @db.VarChar(70)
+  BillingCity       String?       @db.VarChar(40)
+  BillingState      String?       @db.VarChar(40)
+  BillingCountry    String?       @db.VarChar(40)
+  BillingPostalCode String?       @db.VarChar(10)
+  Total             Decimal       @db.Decimal(10, 2)
+  Customer          Customer      @relation(fields: [CustomerId], references: [CustomerId], onDelete: NoAction, onUpdate: NoAction, map: "FK_InvoiceCustomerId")
+  InvoiceLine       InvoiceLine[]
+
+  @@index([CustomerId], map: "IFK_InvoiceCustomerId")
+}
+
+model InvoiceLine {
+  InvoiceLineId Int     @id(map: "PK_InvoiceLine")
+  InvoiceId     Int
+  TrackId       Int
+  UnitPrice     Decimal @db.Decimal(10, 2)
+  Quantity      Int
+  Invoice       Invoice @relation(fields: [InvoiceId], references: [InvoiceId], onDelete: NoAction, onUpdate: NoAction, map: "FK_InvoiceLineInvoiceId")
+  Track         Track   @relation(fields: [TrackId], references: [TrackId], onDelete: NoAction, onUpdate: NoAction, map: "FK_InvoiceLineTrackId")
+
+  @@index([InvoiceId], map: "IFK_InvoiceLineInvoiceId")
+  @@index([TrackId], map: "IFK_InvoiceLineTrackId")
+}
+
+model MediaType {
+  MediaTypeId Int     @id(map: "PK_MediaType")
+  Name        String? @db.VarChar(120)
+  Track       Track[]
+}
+
+model Playlist {
+  PlaylistId    Int             @id(map: "PK_Playlist")
+  Name          String?         @db.VarChar(120)
+  PlaylistTrack PlaylistTrack[]
+}
+
+model PlaylistTrack {
+  PlaylistId Int
+  TrackId    Int
+  Playlist   Playlist @relation(fields: [PlaylistId], references: [PlaylistId], onDelete: NoAction, onUpdate: NoAction, map: "FK_PlaylistTrackPlaylistId")
+  Track      Track    @relation(fields: [TrackId], references: [TrackId], onDelete: NoAction, onUpdate: NoAction, map: "FK_PlaylistTrackTrackId")
+
+  @@id([PlaylistId, TrackId], map: "PK_PlaylistTrack")
+  @@index([TrackId], map: "IFK_PlaylistTrackTrackId")
+}
+
+model Track {
+  TrackId       Int             @id(map: "PK_Track")
+  Name          String          @db.VarChar(200)
+  AlbumId       Int?
+  MediaTypeId   Int
+  GenreId       Int?
+  Composer      String?         @db.VarChar(220)
+  Milliseconds  Int
+  Bytes         Int?
+  UnitPrice     Decimal         @db.Decimal(10, 2)
+  Album         Album?          @relation(fields: [AlbumId], references: [AlbumId], onDelete: NoAction, onUpdate: NoAction, map: "FK_TrackAlbumId")
+  Genre         Genre?          @relation(fields: [GenreId], references: [GenreId], onDelete: NoAction, onUpdate: NoAction, map: "FK_TrackGenreId")
+  MediaType     MediaType       @relation(fields: [MediaTypeId], references: [MediaTypeId], onDelete: NoAction, onUpdate: NoAction, map: "FK_TrackMediaTypeId")
+  InvoiceLine   InvoiceLine[]
+  PlaylistTrack PlaylistTrack[]
+
+  @@index([AlbumId], map: "IFK_TrackAlbumId")
+  @@index([GenreId], map: "IFK_TrackGenreId")
+  @@index([MediaTypeId], map: "IFK_TrackMediaTypeId")
+}
+
 enum Role {
   ADMIN
   USER
@@ -17,47 +153,4 @@ enum Role {
 enum VoteType {
   UPVOTE
   DOWNVOTE
-}
-
-// Define your own datamodels here and run `yarn redwood prisma migrate dev`
-// to create migrations for them and apply to your dev DB.
-model User {
-  id           Int     @id @default(autoincrement())
-  email        String  @unique
-  password     String
-  name         String
-  surname      String
-  role         Role    @default(USER)
-  refreshToken String?
-  twoFactorToken   String?
-  Vote         Vote[]
-}
-
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  imageUrl  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Upvotes / downvotes without query
-  upvotes   Int @default(0)
-  downvotes Int @default(0)
-
-  // Keep track of who has voted
-  votes Vote[]
-}
-
-model Vote {
-  id   Int      @id @default(autoincrement())
-  kind VoteType
-
-  post   Post @relation(fields: [postId], references: [id])
-  postId Int
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
