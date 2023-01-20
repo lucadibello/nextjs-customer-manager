@@ -36,3 +36,9 @@ The database could be extended with new entities or attributes of existing entit
 I used NextJS to develop the solution starting from the boilerplate created for my previous project [nextjs-jwt-auth-boilerplate](https://github.com/lucadibello/nextjs-jwt-auth-boilerplate). To implement the required logging and traceability, I used an SaaS solution called [Sentry](https://sentry.io/welcome/) which is a real-time error tracking tool that helps developers monitor and fix crashes in real time.
 
 In addition, I decided to convert the project into a PWA ([Progressive Web App](https://web.dev/progressive-web-apps/)) to make it more like a native app. To do this, I used the [next-pwa](https://www.npmjs.com/package/next-pwa) module which is a NextJS plugin that allows you to easily add PWA features to your NextJS application. I also generated all the required maskable icons using [maskable.app](https://maskable.app/editor) and added the `manifest.json` file to the `public` folder, fixing also the [middleware.ts](../middleware.ts) file to allow the user to access the required files also when not logged in (by default, each page has protected access).
+
+## Log delle modifiche DB:
+
+- Aggiunto roles + refrsh token + two factor token + unique email
+
+- Removed two factor authentication

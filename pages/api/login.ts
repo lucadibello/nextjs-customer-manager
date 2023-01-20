@@ -5,7 +5,6 @@ import { prisma } from '../../lib/db'
 import * as auth from '../../lib/auth'
 import { UserSession } from '../../lib/types/auth'
 import { LoginApiResponse } from '../login/login'
-import { sendEmail } from '../../lib/mail'
 
 const loginRoute = async (
   req: NextApiRequest,
@@ -23,9 +22,9 @@ const loginRoute = async (
   }
 
   // Check if user exists in database
-  const user = await prisma.user.findUnique({
+  const user = await prisma.employee.findUnique({
     where: {
-      email,
+      Email: email,
     },
   })
 
@@ -37,38 +36,28 @@ const loginRoute = async (
     })
   } else {
     // If user exists, check if password is correct using auth lib
-    if (await auth.verifyPassword(password, user.password)) {
-      // Keep only fields defined in SessionUser
+    if (await auth.verifyPassword(password, user.Password)) {
+    // Keep only fields defined in SessionUser
       const session: UserSession = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        surname: user.surname,
-        role: user.role,
+        id: user.EmployeeId,
+        email: user.Email,
+        name: user.FirstName,
+        surname: user.LastName,
+        role: user.Role,
       }
 
-      // generate access + refresh token + email token for 2 factor authentication
+      // generate access + refresh token
       const token = auth.generateAccessToken(session)
       const refreshToken = auth.generateRefreshToken(session)
-      const twoFactorToken = auth.generateTwoFactorToken(session)
 
       // save refresh token + second factor auth to database
-      await prisma.user.update({
+      await prisma.employee.update({
         where: {
-          id: user.id,
+          EmployeeId: user.EmployeeId,
         },
         data: {
-          refreshToken,
-          twoFactorToken,
+          RefreshToken: refreshToken,
         },
-      })
-
-      //  Send email with specified token
-      sendEmail({
-        to: user.email,
-        subject: 'JWT Authentication - Two factor authentication',
-        text: `Click this link to login...`,
-        html: `<a href="http://localhost:3000/two-factor?token=${twoFactorToken}">Click here to login</a>`,
       })
 
       // return access and refresh token

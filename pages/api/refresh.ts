@@ -37,10 +37,10 @@ const refreshRoute = async (
 
   // Check if refresh token is valid
   if (decoded) {
-    const user = await prisma.user.findFirst({
+    const user = await prisma.employee.findFirst({
       where: {
-        id: decoded.id,
-        email: decoded.email,
+        EmployeeId: decoded.id,
+        Email: decoded.email,
       },
     })
 
@@ -50,7 +50,7 @@ const refreshRoute = async (
         success: false,
         message: 'Invalid refresh token',
       })
-    } else if (user.refreshToken != refreshToken) {
+    } else if (user.RefreshToken != refreshToken) {
       // If refresh token does not match, return a 401 response
       return res.status(401).json({
         success: false,
@@ -58,11 +58,11 @@ const refreshRoute = async (
       })
     } else {
       const session: UserSession = {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        name: user.name,
-        surname: user.surname,
+        id: user.EmployeeId,
+        email: user.Email,
+        role: user.Role,
+        name: user.FirstName,
+        surname: user.LastName,
       }
 
       // If user exists, generate new access token

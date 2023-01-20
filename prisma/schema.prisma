@@ -8,6 +8,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Create enum for user role
+enum Role {
+  MANAGER
+  EMPLOYEE
+}
+
 model Album {
   AlbumId  Int     @id(map: "PK_Album")
   Title    String  @db.VarChar(160)
@@ -45,21 +51,27 @@ model Customer {
 }
 
 model Employee {
-  EmployeeId     Int        @id(map: "PK_Employee")
-  LastName       String     @db.VarChar(20)
-  FirstName      String     @db.VarChar(20)
-  Title          String?    @db.VarChar(30)
-  ReportsTo      Int?
-  BirthDate      DateTime?  @db.Timestamp(6)
-  HireDate       DateTime?  @db.Timestamp(6)
-  Address        String?    @db.VarChar(70)
-  City           String?    @db.VarChar(40)
-  State          String?    @db.VarChar(40)
-  Country        String?    @db.VarChar(40)
-  PostalCode     String?    @db.VarChar(10)
-  Phone          String?    @db.VarChar(24)
-  Fax            String?    @db.VarChar(24)
-  Email          String?    @db.VarChar(60)
+  EmployeeId Int       @id(map: "PK_Employee")
+  LastName   String    @db.VarChar(20)
+  FirstName  String    @db.VarChar(20)
+  Title      String?   @db.VarChar(30)
+  ReportsTo  Int?
+  BirthDate  DateTime? @db.Timestamp(6)
+  HireDate   DateTime? @db.Timestamp(6)
+  Address    String?   @db.VarChar(70)
+  City       String?   @db.VarChar(40)
+  State      String?   @db.VarChar(40)
+  Country    String?   @db.VarChar(40)
+  PostalCode String?   @db.VarChar(10)
+  Phone      String?   @db.VarChar(24)
+  Fax        String?   @db.VarChar(24)
+  Email      String    @unique @db.VarChar(60)
+
+  // Role + tokens
+  Password     String  @default("$2b$10$Y6AD7sxVuICRIZlAOpk33eqlU7JuG5ir8rmzGMmXK2GadCrPI7gye") // Default password: Jo5hu4!
+  Role         Role    @default(EMPLOYEE)
+  RefreshToken String?
+
   Employee       Employee?  @relation("EmployeeToEmployee", fields: [ReportsTo], references: [EmployeeId], onDelete: NoAction, onUpdate: NoAction, map: "FK_EmployeeReportsTo")
   Customer       Customer[]
   other_Employee Employee[] @relation("EmployeeToEmployee")
@@ -143,14 +155,4 @@ model Track {
   @@index([AlbumId], map: "IFK_TrackAlbumId")
   @@index([GenreId], map: "IFK_TrackGenreId")
   @@index([MediaTypeId], map: "IFK_TrackMediaTypeId")
-}
-
-enum Role {
-  ADMIN
-  USER
-}
-
-enum VoteType {
-  UPVOTE
-  DOWNVOTE
 }
