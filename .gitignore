@@ -40,5 +40,6 @@ next-env.d.ts
 
 # NextJS PWA
 **/public/workbox-*.js
+**/public/workbox-*.js.map
 **/public/sw.js
 **/public/fallback-*.js
