@@ -24,5 +24,6 @@ export const config = {
    * - workbox-<hash>.js.map (workbox file)
    * - manifest.json (manifest file)
    */
-  matcher: '/((?!api|_next/static|favicon.ico|icons/*|sw.js|sw.js.map|workbox-327c579b.js|manifest.json).*)',
+  matcher:
+    '/((?!api|_next/static|favicon.ico|icons/*|sw.js|sw.js.map|workbox-327c579b.js|manifest.json).*)',
 }

@@ -72,9 +72,10 @@ model Employee {
   Role         Role    @default(EMPLOYEE)
   RefreshToken String?
 
-  Employee       Employee?  @relation("EmployeeToEmployee", fields: [ReportsTo], references: [EmployeeId], onDelete: NoAction, onUpdate: NoAction, map: "FK_EmployeeReportsTo")
+  Employee       Employee?       @relation("EmployeeToEmployee", fields: [ReportsTo], references: [EmployeeId], onDelete: NoAction, onUpdate: NoAction, map: "FK_EmployeeReportsTo")
   Customer       Customer[]
-  other_Employee Employee[] @relation("EmployeeToEmployee")
+  other_Employee Employee[]      @relation("EmployeeToEmployee")
+  AuthChallenge  AuthChallenge[]
 
   @@index([ReportsTo], map: "IFK_EmployeeReportsTo")
 }
@@ -155,4 +156,11 @@ model Track {
   @@index([AlbumId], map: "IFK_TrackAlbumId")
   @@index([GenreId], map: "IFK_TrackGenreId")
   @@index([MediaTypeId], map: "IFK_TrackMediaTypeId")
+}
+
+model AuthChallenge {
+  EmployeeId Int      @id
+  Token      String
+  CreatedAt  DateTime @default(now())
+  Employee   Employee @relation(fields: [EmployeeId], references: [EmployeeId])
 }

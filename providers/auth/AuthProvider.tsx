@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { UserSession } from '../../lib/types/auth'
+import { ChangePasswordApiResponse, UserSession } from '../../lib/types/auth'
 import { LoginApiResponse, RefreshApiResponse } from '../../pages/login/login'
 
 interface AuthContextData {
@@ -10,6 +10,7 @@ interface AuthContextData {
   logIn: (_data: LoginData) => Promise<void>
   logOut: () => void
   refreshSession: () => Promise<void>
+  changePassword: (_otp: string, _newPassword: string) => Promise<void>
 }
 
 interface AuthProviderProps {
@@ -22,8 +23,9 @@ const AuthContext = createContext<AuthContextData>({
   accessToken: null,
   refreshToken: null,
   logIn: () => Promise.resolve(),
-  logOut: () => {},
+  logOut: () => { },
   refreshSession: () => Promise.resolve(),
+  changePassword: () => Promise.resolve(),
 })
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -34,7 +36,6 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Watch currentUser
   useEffect(() => {
-    console.log('current user changed')
     if (!currentUser) {
       // try to get user from local storage
       const user = localStorage.getItem('currentUser')
@@ -47,7 +48,6 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Watch access token
   useEffect(() => {
-    console.log('access token changed')
     if (!accessToken) {
       // Read access token from cookies
       const cookies = document.cookie.split(';')
@@ -61,11 +61,9 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Watch refresh token
   useEffect(() => {
-    console.log('refresh token changed')
     if (!refreshToken) {
       // try to get refresh token from local storage
       const token = localStorage.getItem('refreshToken')
-      console.log('refresh token', token)
       if (token != null && token !== 'undefined') {
         setRefreshToken(token)
       }
@@ -174,6 +172,31 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     })
   }
 
+  const changePassword = async (otp: string, password: string) => {
+    return new Promise<void>((resolve, reject) => {
+      fetch('/api/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ otp, password }),
+      })
+        .then(res => res.json() as Promise<ChangePasswordApiResponse>)
+        .then(res => {
+          if (res.success) {
+            // Password changed successfully
+            resolve()
+          } else {
+            // Password change failed
+            reject(new Error(res.message))
+          }
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -184,6 +207,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         refreshSession,
         refreshToken,
         accessToken,
+        changePassword,
       }}
     >
       {children}

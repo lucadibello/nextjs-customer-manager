@@ -26,35 +26,15 @@ export const authMiddleware: Middleware = async <T extends ApiResponse<T>>(
     } as T)
   }
 
+  console.log(token)
+
   // Check if access token is valid
+  let decoded
   try {
-    const decoded = await verifyToken(
+    decoded = await verifyToken(
       token,
       process.env.JWT_ACCESS_TOKEN_SECRET as string
     )
-
-    // Ensure that a user has done 2 factor authentication (is twoFactorToken is NULL)
-    const user = await prisma.employee.findUnique({
-      where: {
-        EmployeeId: decoded.id,
-      },
-    })
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid token',
-      } as T)
-    }
-
-    // Add user to request
-    req.user = decoded
-
-    // and call next()
-    if (next) await next(req, res, undefined)
-
-    // Else, return
-    return res.status(200)
   } catch (error) {
     // If token is just expired, try to refresh it
     if (error instanceof TokenExpiredError) {
@@ -70,4 +50,27 @@ export const authMiddleware: Middleware = async <T extends ApiResponse<T>>(
       message: 'Invalid token',
     } as T)
   }
+
+  // Ensure that a user has done 2 factor authentication (is twoFactorToken is NULL)
+  const user = await prisma.employee.findUnique({
+    where: {
+      EmployeeId: decoded.id,
+    },
+  })
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid token',
+    } as T)
+  }
+
+  // Add user to request
+  req.user = decoded
+
+  // and call next()
+  if (next) await next(req, res, undefined)
+
+  // Else, return
+  return res.status(200)
 }

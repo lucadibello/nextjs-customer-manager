@@ -5,6 +5,7 @@
 // https://nextjs.org/docs/api-reference/next.config.js/introduction
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 const { withSentryConfig } = require('@sentry/nextjs');
+const { m } = require('framer-motion');
 const withPWA = require('next-pwa')({
   dest: "public",
   register: true,
@@ -30,6 +31,12 @@ const nextConfig = {
     // for more information.
     hideSourceMaps: true,
   },
+
+  env: {
+    SENSITIVE_ROUTES: [
+      '/api/user/change-password',
+    ]
+  }
 }
 
 const sentryWebpackPluginOptions = {
