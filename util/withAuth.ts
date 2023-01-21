@@ -20,7 +20,7 @@ const withAuth = async <T extends Object = any>(
   onSuccess: () => Promise<GetServerSidePropsResult<T>>,
   options: AuthOptions = {
     redirectTo: '/login',
-    twoFactorEnabled: true,
+    twoFactorEnabled: false,
   }
 ): Promise<GetServerSidePropsResult<T>> => {
   // Get the user's session based on the request
@@ -32,16 +32,16 @@ const withAuth = async <T extends Object = any>(
     return verifyAccessToken(token)
       .then(async decoded => {
         // Now, check if user has done 2 factor authentication
-        const user = await prisma.user.findUnique({
-          where: {
-            id: decoded.id,
+        const user = await prisma.employee.findUnique({
+        where: {
+            EmployeeId: decoded.id,
           },
         })
 
         // If user has not done 2 factor authentication, redirect to 2 factor authentication page
         if (!user) {
           return redirectToLogin
-        } else if (options.twoFactorEnabled && user.twoFactorToken) {
+        } else if (options.twoFactorEnabled) {
           return redirectToLogin
         } else {
           // If user has done 2 factor authentication, call onSuccess function

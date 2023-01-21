@@ -9,7 +9,7 @@ const withPWA = require('next-pwa')({
   dest: "public",
   register: true,
   skipWaiting: true,
-  // FIXME: disable: process.env.NODE_ENV === 'development'
+  disable: process.env.NODE_ENV === 'development', // Disable the service worker in development
 })
 
 /** @type {import('next').NextConfig} */

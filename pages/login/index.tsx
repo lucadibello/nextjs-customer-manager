@@ -44,8 +44,8 @@ const LoginPage = () => {
           isClosable: true,
         })
 
-        // Redirect to home page
-        router.push('/two-factor')
+        // Redirect to home page after login
+        router.push('/')
       })
       .catch(err => {
         toast({

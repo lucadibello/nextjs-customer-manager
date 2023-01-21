@@ -18,30 +18,19 @@ import Navbar from '../components/Navbar'
 import NavbarProfile from '../components/NavbarProfile'
 import { useAuth } from '../providers/auth/AuthProvider'
 
-import { prisma } from '../lib/db'
 import PostLibrary from '../components/PostLibrary'
-import { PostsApiResponse } from './api/posts'
 import fetcher from '../util/fetcher'
 import withAuth from '../util/withAuth'
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => withAuth(context, async () => {
-  // `getStaticProps` is executed on the server side.
-  const posts = await prisma.post.findMany()
-
-  // Little workaround to get NextJS to convert Dates into JSON
-  const postsJson = JSON.parse(JSON.stringify(posts))
-
-  const postsApiResponse: PostsApiResponse = {
-    success: true,
-    data: {
-      posts: postsJson,
-    },
-  }
-
   return {
     props: {
       fallback: {
-        '/api/posts': postsApiResponse, // Empty array if error while fetching data
+        '/api/posts': {
+          data: {
+            posts: [],
+          },
+        },
       },
     },
   }
@@ -68,7 +57,7 @@ const HomePage: NextPage<
     data: posts,
     error,
     mutate,
-  } = useSWR<PostsApiResponse>('/api/posts', fetcher)
+  } = useSWR<any>('/api/posts', fetcher)
 
   return (
     <SWRConfig value={{ fallback }}>
@@ -113,8 +102,8 @@ const HomePage: NextPage<
               <Text>{currentUser.email}</Text>
             </HStack>
             <HStack>
-              <Text fontWeight={'bold'}>Admin:</Text>
-              <Text>{currentUser.role == 'ADMIN' ? 'Yes' : 'No'}</Text>
+              <Text fontWeight={'bold'}>Is manager?</Text>
+              <Text>{currentUser.role == 'MANAGER' ? 'Yes' : 'No'}</Text>
             </HStack>
             <Heading mt={5}>JWT tokens:</Heading>
             <Divider mb={5} />
