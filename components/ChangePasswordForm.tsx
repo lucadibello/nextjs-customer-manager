@@ -18,12 +18,16 @@ const ChangePasswordForm = ({ onSuccess, isLoading }: IChangePasswordFormProps) 
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    watch
+    watch,
+    reset
   } = useForm<ChangePasswordData>()
 
   const onSubmit = (data: ChangePasswordData) => {
     // call onSuccess callback
     onSuccess(data.newPassword)
+
+    // reset form
+    reset()
   }
 
   return (
@@ -42,7 +46,7 @@ const ChangePasswordForm = ({ onSuccess, isLoading }: IChangePasswordFormProps) 
         </FormErrorMessage>
       </FormControl>
 
-      <FormControl isInvalid={!!errors.confirmNewPassword}>
+      <FormControl mt={2} isInvalid={!!errors.confirmNewPassword}>
         <FormLabel htmlFor="newPassword">Confirm new password</FormLabel>
         <Input
           id="confirmNewPassword"
@@ -57,7 +61,7 @@ const ChangePasswordForm = ({ onSuccess, isLoading }: IChangePasswordFormProps) 
         </FormErrorMessage>
       </FormControl>
 
-      <Button type="submit" isLoading={isSubmitting || isLoading}>Change password</Button>
+      <Button mt={2} type="submit" isLoading={isSubmitting || isLoading} colorScheme="blue">Change password</Button>
     </form>
   )
 }

@@ -15,6 +15,6 @@ export type StartChallengeApiResponse = ApiResponse<{
   challenge: string
 }>
 
-export type ChangePasswordApiResponse = ApiResponse
+export type ChangePasswordApiResponse = ApiResponse<undefined>
 
 export type UserSession = Omit<User, 'password' | 'refreshToken'>

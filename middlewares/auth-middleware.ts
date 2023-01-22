@@ -26,8 +26,6 @@ export const authMiddleware: Middleware = async <T extends ApiResponse<T>>(
     } as T)
   }
 
-  console.log(token)
-
   // Check if access token is valid
   let decoded
   try {

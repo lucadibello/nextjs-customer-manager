@@ -79,7 +79,6 @@ const refreshRoute = async (
       throw new Error('Invalid refresh token')
     }
   } catch (e) {
-    console.log(e)
     // If they don't match, return a 401 response
     return res.status(401).json({
       success: false,

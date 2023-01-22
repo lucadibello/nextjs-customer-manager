@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { ChangePasswordApiResponse, UserSession } from '../../lib/types/auth'
 import { LoginApiResponse, RefreshApiResponse } from '../../pages/login/login'
+import fetcher from '../../util/fetcher'
 
 interface AuthContextData {
   isAuthenticated: boolean
@@ -174,14 +175,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const changePassword = async (otp: string, password: string) => {
     return new Promise<void>((resolve, reject) => {
-      fetch('/api/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ otp, password }),
-      })
-        .then(res => res.json() as Promise<ChangePasswordApiResponse>)
+      fetcher<ChangePasswordApiResponse>('/api/change-password', { otp, password })
         .then(res => {
           if (res.success) {
             // Password changed successfully
@@ -192,6 +186,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         })
         .catch(err => {
+          console.error("My error: ", err)
           reject(err)
         })
     })

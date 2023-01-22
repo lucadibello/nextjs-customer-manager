@@ -50,6 +50,31 @@ const changePasswordRoute = async (
     })
   }
 
+  // Fetch employee's password from database
+  const employee = await prisma.employee.findFirst({
+    where: {
+      EmployeeId: req.user.id,
+    },
+    select: {
+      Password: true,
+    },
+  })
+
+  if (employee) {
+    // Now, verify that the new password is not the same as the old password
+    if (await auth.verifyPassword(password, employee.Password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password cannot be the same as the old password',
+      })
+    }
+  } else {
+    return res.status(400).json({
+      success: false,
+      message: 'Employee not found',
+    })
+  }
+
   // Hash password
   const hashedPassword = await auth.hashPassword(password)
 

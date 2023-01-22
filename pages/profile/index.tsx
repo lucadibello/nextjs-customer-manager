@@ -35,7 +35,7 @@ const ProfilePage = () => {
       if (otp) {
         toast({
           title: "OTP generated",
-          description: "Your OTP has been generated. You can now change your password.",
+          description: "Your new OTP challenge code has been generated and will be used automatically to update your password.",
           status: "success",
           duration: 5000,
           isClosable: true,
@@ -219,17 +219,19 @@ const ProfilePage = () => {
         <Divider mb={5} />
 
         {/* Two fields, one to confirm the current password, and one to insert the new password */}
-        <ChangePasswordForm
-          isLoading={isPending}
-          onSuccess={(newPassword: string) => {
-            // Set global state to true
-            setIsUserChangingPassword(true)
-            setNewUserPassword(newPassword)
+        <Box maxWidth={"20%"}>
+          <ChangePasswordForm
+            isLoading={isPending}
+            onSuccess={(newPassword: string) => {
+              // Set global state to true
+              setIsUserChangingPassword(true)
+              setNewUserPassword(newPassword)
 
-            // Start the authentication challenge
-            triggerAuthChallenge()
-          }}
-        />
+              // Start the authentication challenge
+              triggerAuthChallenge()
+            }}
+          />
+        </Box>
       </Box>
     </Box >
   )
