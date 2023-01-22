@@ -6,6 +6,14 @@ import * as auth from '../../lib/auth'
 import { UserSession } from '../../lib/types/auth'
 import { LoginApiResponse } from '../login/login'
 import { Role } from '@prisma/client'
+import { joiMiddleware } from '../../middlewares/joi-middleware'
+import Joi from 'joi'
+
+// Define JOI schema for request body
+const schema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().required(),
+})
 
 const loginRoute = async (
   req: NextApiRequest,
@@ -13,14 +21,6 @@ const loginRoute = async (
 ) => {
   // Extract email and password from request body
   const { email, password } = req.body as { email: string; password: string }
-
-  // If email or password is not present, return a 400 response
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: 'Missing email or password',
-    })
-  }
 
   // Check if user exists in database
   const user = await prisma.employee.findUnique({
@@ -91,4 +91,4 @@ const loginRoute = async (
   }
 }
 
-export default withMiddlewares(loginRoute)
+export default withMiddlewares(joiMiddleware(schema), loginRoute)

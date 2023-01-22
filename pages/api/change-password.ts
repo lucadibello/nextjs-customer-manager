@@ -8,6 +8,14 @@ import {
   authMiddleware,
   NextApiRequestWithUser,
 } from '../../middlewares/auth-middleware'
+import Joi from 'joi'
+import { joiMiddleware } from '../../middlewares/joi-middleware'
+
+// Define JOI schema for request body
+const schema = Joi.object({
+  password: Joi.string().required(),
+  otp: Joi.string().required(),
+})
 
 const changePasswordRoute = async (
   req: NextApiRequestWithUser,
@@ -102,4 +110,8 @@ const changePasswordRoute = async (
   })
 }
 
-export default withMiddlewares(authMiddleware, changePasswordRoute)
+export default withMiddlewares(
+  authMiddleware,
+  joiMiddleware(schema),
+  changePasswordRoute
+)

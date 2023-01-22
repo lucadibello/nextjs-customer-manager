@@ -186,7 +186,6 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         })
         .catch(err => {
-          console.error("My error: ", err)
           reject(err)
         })
     })
