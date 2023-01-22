@@ -219,7 +219,7 @@ const ProfilePage = () => {
         <Divider mb={5} />
 
         {/* Two fields, one to confirm the current password, and one to insert the new password */}
-        <Box maxWidth={"20%"}>
+        <Box minWidth={"50%"}>
           <ChangePasswordForm
             isLoading={isPending}
             onSuccess={(newPassword: string) => {
