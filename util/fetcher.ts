@@ -1,6 +1,5 @@
-import Cookie from 'cookie-universal'
 import { RefreshApiResponse } from '../pages/login/login'
-
+import { setCookie } from 'cookies-next'
 import { ApiResponse } from '../lib/types/api'
 
 /**
@@ -9,7 +8,8 @@ import { ApiResponse } from '../lib/types/api'
  * @param isRetrying Whether this is a retry after a token refresh
  * @returns The response from the fetch
  */
-const fetcher = <T extends ApiResponse<T>>(
+
+const fetcher = <T extends ApiResponse<any>>(
   url: string,
   data: object | null = null,
   isRetrying = false
@@ -45,8 +45,9 @@ const fetcher = <T extends ApiResponse<T>>(
           .then(refreshRes => {
             if (refreshRes.success && refreshRes.data) {
               // Update the new access token in cookies
-              const cookie = Cookie()
-              cookie.set('token', refreshRes.data.token)
+              setCookie('token', refreshRes.data.token, {
+                sameSite: true,
+              })
 
               // Retry the request
               return fetcher<T>(url, data, true)
@@ -66,5 +67,8 @@ const fetcher = <T extends ApiResponse<T>>(
     }
   })
 }
+
+export const swrFetcher = <T extends ApiResponse<any>>(url: string) =>
+  fetcher<T>(url)
 
 export default fetcher
