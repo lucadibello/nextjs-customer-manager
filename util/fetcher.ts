@@ -55,6 +55,10 @@ const fetcher = <T extends ApiResponse<any>>(
               throw new Error('Unable to refresh token')
             }
           })
+          .catch(() => {
+            // Redirect to login page if refresh token is invalid
+            throw new Error('Unable to refresh token')
+          })
       } else {
         throw new Error('Missing refresh token. Please login again.')
       }
