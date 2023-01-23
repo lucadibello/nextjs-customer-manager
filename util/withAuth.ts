@@ -1,6 +1,7 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { verifyAccessToken } from '../lib/auth'
 import { prisma } from '../lib/db'
+import { getCookie, hasCookie } from 'cookies-next'
 
 const redirectToLogin = {
   redirect: {
@@ -16,41 +17,39 @@ export type AuthOptions = {
 
 // Create a getServerSideProps utility function called "withAuth" to check user
 const withAuth = async <T extends Object = any>(
-  { req }: GetServerSidePropsContext,
-  onSuccess: () => Promise<GetServerSidePropsResult<T>>,
+  { req, res }: GetServerSidePropsContext,
+  onSuccess: (_token?: string) => Promise<GetServerSidePropsResult<T>>,
   options: AuthOptions = {
     redirectTo: '/login',
     twoFactorEnabled: false,
   }
 ): Promise<GetServerSidePropsResult<T>> => {
+  const token = getCookie('token', { req, res })
+
   // Get the user's session based on the request
-  if (req.cookies.token) {
-    // Get token from cookie
-    const token = req.cookies.token.split(' ')[0]
+  if (hasCookie('token', { req, res }) && token) {
+    // Wair for the token to be verified
+    let result
+    try {
+      result = await verifyAccessToken(token.toString())
+    } catch (e) {
+      return redirectToLogin
+    }
 
-    // Dececode user token and get user data
-    return verifyAccessToken(token)
-      .then(async decoded => {
-        // Now, check if user has done 2 factor authentication
-        const user = await prisma.employee.findUnique({
-          where: {
-            EmployeeId: decoded.id,
-          },
-        })
+    // Now, check if user exists in the database
+    const user = await prisma.employee.findUnique({
+      where: {
+        EmployeeId: result.id,
+      },
+    })
 
-        // If user has not done 2 factor authentication, redirect to 2 factor authentication page
-        if (!user) {
-          return redirectToLogin
-        } else if (options.twoFactorEnabled) {
-          return redirectToLogin
-        } else {
-          // If user has done 2 factor authentication, call onSuccess function
-          return onSuccess()
-        }
-      })
-      .catch(() => {
-        return redirectToLogin
-      })
+    if (!user) {
+      return redirectToLogin
+    } else if (options.twoFactorEnabled) {
+      return redirectToLogin
+    } else {
+      return onSuccess(token.toString())
+    }
   } else {
     return redirectToLogin
   }

@@ -1,10 +1,16 @@
 // middleware.ts
 import { NextRequest, NextResponse } from 'next/server'
 
+// List of paths that don't require authentication
+const publicPaths = ['/login', '/register', '/']
+
 export function middleware(request: NextRequest) {
-  // Check if a user session exists
   if (!request.cookies.get('token')) {
-    if (request.nextUrl.pathname != '/login') {
+    // If the user is trying to access a public path, allow it
+    if (publicPaths.includes(request.nextUrl.pathname)) {
+      return
+    } else {
+      // Otherwise, redirect to the login page
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }

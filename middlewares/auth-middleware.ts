@@ -5,6 +5,7 @@ import { ApiResponse } from '../lib/types/api'
 import { UserSession } from '../lib/types/auth'
 import { Middleware } from '../lib/types/middleware'
 import { prisma } from '../lib/db'
+import { hasCookie, getCookie } from 'cookies-next'
 
 export type NextApiRequestWithUser = NextApiRequest & {
   user: UserSession
@@ -17,9 +18,11 @@ export const authMiddleware: Middleware = async <T extends ApiResponse<T>>(
   next?: Middleware
 ) => {
   // look for access token inside cookies
-  const token =
-    req.cookies && req.cookies.token ? req.cookies.token.split(' ')[0] : null
-  if (!token) {
+  // Read cookie
+  const token = getCookie('token', { req, res })
+
+  // Check if token exists
+  if (!hasCookie('token', { req, res }) || !token) {
     return res.status(401).json({
       success: false,
       message: 'Missing token',
@@ -29,8 +32,9 @@ export const authMiddleware: Middleware = async <T extends ApiResponse<T>>(
   // Check if access token is valid
   let decoded
   try {
+    // Verify token
     decoded = await verifyToken(
-      token,
+      token.toString(),
       process.env.JWT_ACCESS_TOKEN_SECRET as string
     )
   } catch (error) {

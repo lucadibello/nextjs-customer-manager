@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { ChangePasswordApiResponse, UserSession } from '../../lib/types/auth'
 import { LoginApiResponse, RefreshApiResponse } from '../../pages/login/login'
 import fetcher from '../../util/fetcher'
+import { setCookie } from 'cookies-next'
 
 interface AuthContextData {
   isAuthenticated: boolean
@@ -85,13 +86,18 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         .then(res => {
           if (res.success && res.data) {
             // save access token in cookies
-            document.cookie = `token=${res.data.token} secure`
+            setCookie('token', res.data.token, {
+              sameSite: true,
+            })
 
-            // Save refresh token in session storage for persistence
-            localStorage.setItem('refreshToken', res.data.refreshToken)
+            // Check if APIs returned also a refresh token
+            if (res.data.refreshToken) {
+              // Save refresh token in session storage for persistence
+              localStorage.setItem('refreshToken', res.data.refreshToken)
 
-            // Save access token and refresh token
-            setRefreshToken(res.data.refreshToken)
+              // Save access token and refresh token
+              setRefreshToken(res.data.refreshToken)
+            }
 
             // save user data inside state
             setCurrentUser(res.data.session)
