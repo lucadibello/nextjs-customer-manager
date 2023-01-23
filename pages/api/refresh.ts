@@ -6,10 +6,17 @@ import { NextApiRequestWithUser } from '../../middlewares/auth-middleware'
 import { generateAccessToken } from '../../lib/auth'
 import { ApiResponse } from '../../lib/types/api'
 import { UserSession } from '../../lib/types/auth'
+import Joi from 'joi'
+import { joiMiddleware } from '../../middlewares/joi-middleware'
 
 export type RefreshApiResponse = ApiResponse<{
   token: string
 }>
+
+// Define JOI schema for request body
+const schema = Joi.object({
+  refreshToken: Joi.string().required(),
+})
 
 const refreshRoute = async (
   req: NextApiRequestWithUser,
@@ -79,7 +86,6 @@ const refreshRoute = async (
       throw new Error('Invalid refresh token')
     }
   } catch (e) {
-    console.log(e)
     // If they don't match, return a 401 response
     return res.status(401).json({
       success: false,
@@ -88,4 +94,4 @@ const refreshRoute = async (
   }
 }
 
-export default withMiddlewares(refreshRoute)
+export default withMiddlewares(joiMiddleware(schema), refreshRoute)

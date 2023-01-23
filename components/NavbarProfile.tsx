@@ -8,9 +8,11 @@ import {
   MenuList,
   VStack,
   Text,
+  MenuDivider,
 } from '@chakra-ui/react'
 import { UserSession } from '../lib/types/auth'
-import { FiChevronDown, FiLogOut } from 'react-icons/fi'
+import { FiChevronDown, FiLogOut, FiUser } from 'react-icons/fi'
+import Link from 'next/link'
 
 interface INavbarProfileProps {
   currentUser: UserSession
@@ -54,6 +56,15 @@ const NavbarProfile = ({ currentUser, onLogOut }: INavbarProfileProps) => {
             </Flex>
           </MenuButton>
           <MenuList>
+            {/* Profile link */}
+            <Link href="/profile">
+              <MenuItem icon={<FiUser />}>
+                Profile page
+              </MenuItem>
+            </Link>
+            <MenuDivider />
+
+            {/* Logout link */}
             <MenuItem onClick={onLogOut} icon={<FiLogOut />}>
               Sign out
             </MenuItem>

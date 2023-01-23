@@ -1,4 +1,5 @@
-import { Role } from "@prisma/client"
+import { Role } from '@prisma/client'
+import { ApiResponse } from './api'
 
 type User = {
   id: number
@@ -9,5 +10,11 @@ type User = {
   role: Role
   refreshToken: string
 }
+
+export type StartChallengeApiResponse = ApiResponse<{
+  challenge: string
+}>
+
+export type ChangePasswordApiResponse = ApiResponse<undefined>
 
 export type UserSession = Omit<User, 'password' | 'refreshToken'>

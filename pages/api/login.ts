@@ -5,6 +5,15 @@ import { prisma } from '../../lib/db'
 import * as auth from '../../lib/auth'
 import { UserSession } from '../../lib/types/auth'
 import { LoginApiResponse } from '../login/login'
+import { Role } from '@prisma/client'
+import { joiMiddleware } from '../../middlewares/joi-middleware'
+import Joi from 'joi'
+
+// Define JOI schema for request body
+const schema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().required(),
+})
 
 const loginRoute = async (
   req: NextApiRequest,
@@ -12,14 +21,6 @@ const loginRoute = async (
 ) => {
   // Extract email and password from request body
   const { email, password } = req.body as { email: string; password: string }
-
-  // If email or password is not present, return a 400 response
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: 'Missing email or password',
-    })
-  }
 
   // Check if user exists in database
   const user = await prisma.employee.findUnique({
@@ -37,7 +38,7 @@ const loginRoute = async (
   } else {
     // If user exists, check if password is correct using auth lib
     if (await auth.verifyPassword(password, user.Password)) {
-    // Keep only fields defined in SessionUser
+      // Keep only fields defined in SessionUser
       const session: UserSession = {
         id: user.EmployeeId,
         email: user.Email,
@@ -48,27 +49,39 @@ const loginRoute = async (
 
       // generate access + refresh token
       const token = auth.generateAccessToken(session)
-      const refreshToken = auth.generateRefreshToken(session)
 
-      // save refresh token + second factor auth to database
-      await prisma.employee.update({
-        where: {
-          EmployeeId: user.EmployeeId,
-        },
-        data: {
-          RefreshToken: refreshToken,
-        },
-      })
+      // Generate refresh token only for managers
+      if (session.role == Role.MANAGER) {
+        const refreshToken = auth.generateRefreshToken(session)
 
-      // return access and refresh token
-      return res.status(200).json({
-        success: true,
-        data: {
-          token,
-          refreshToken,
-          session,
-        },
-      })
+        // save refresh token + second factor auth to database
+        await prisma.employee.update({
+          where: {
+            EmployeeId: user.EmployeeId,
+          },
+          data: {
+            RefreshToken: refreshToken,
+          },
+        })
+        // return access and refresh token
+        return res.status(200).json({
+          success: true,
+          data: {
+            token,
+            refreshToken,
+            session,
+          },
+        })
+      } else {
+        // return access and refresh token
+        return res.status(200).json({
+          success: true,
+          data: {
+            token,
+            session,
+          },
+        })
+      }
     } else {
       return res.status(401).json({
         success: false,
@@ -78,4 +91,4 @@ const loginRoute = async (
   }
 }
 
-export default withMiddlewares(loginRoute)
+export default withMiddlewares(joiMiddleware(schema), loginRoute)

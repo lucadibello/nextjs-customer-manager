@@ -33,7 +33,7 @@ const withAuth = async <T extends Object = any>(
       .then(async decoded => {
         // Now, check if user has done 2 factor authentication
         const user = await prisma.employee.findUnique({
-        where: {
+          where: {
             EmployeeId: decoded.id,
           },
         })
@@ -48,8 +48,7 @@ const withAuth = async <T extends Object = any>(
           return onSuccess()
         }
       })
-      .catch(err => {
-        console.log(err)
+      .catch(() => {
         return redirectToLogin
       })
   } else {
