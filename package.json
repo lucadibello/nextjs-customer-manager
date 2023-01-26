@@ -15,6 +15,7 @@
     "@emotion/styled": "^11",
     "@prisma/client": "4.6.1",
     "@sentry/nextjs": "^7.28.1",
+    "@tanstack/react-table": "^8.7.6",
     "@types/node": "^18.11.9",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.8",
