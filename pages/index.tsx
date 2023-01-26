@@ -2,12 +2,24 @@ import {
   Box,
   Heading,
   useToast,
+  Text,
+  HStack,
+  IconButton,
+  Checkbox,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverHeader,
 } from '@chakra-ui/react'
 import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
-import useSWR, { SWRConfig } from 'swr'
-import CustomerTable from '../components/CustomerTable'
+import { useEffect, useState } from 'react'
+import { FiFilter } from 'react-icons/fi'
+import useSWR, { SWRConfig, SWRResponse } from 'swr'
+import CustomerTable, { CustomerTableAvailableColumns, defaultColumns } from '../components/CustomerTable'
 import Navbar from '../components/Navbar'
 import NavbarProfile from '../components/NavbarProfile'
 import { CustomersApiResponse } from '../lib/types/apis/customers'
@@ -15,6 +27,22 @@ import { useAuth } from '../providers/auth/AuthProvider'
 import { swrFetcher } from '../util/fetcher'
 
 import withAuth from '../util/withAuth'
+
+
+const allPossibleColumns: CustomerTableAvailableColumns = [
+  'CustomerId',
+  'FirstName',
+  'LastName',
+  'Company',
+  'Address',
+  'City',
+  'State',
+  'Country',
+  'PostalCode',
+  'Phone',
+  'Fax',
+  'Email',
+]
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => withAuth(context, async (token) => {
   // Fetch posts from APIs
@@ -63,22 +91,45 @@ export const getServerSideProps = (context: GetServerSidePropsContext) => withAu
 })
 
 
+const SWRCustomerTable = ({ customers, columns }: { customers: SWRResponse<CustomersApiResponse>, columns: CustomerTableAvailableColumns }) => {
+  if (customers.error) {
+    return (
+      <Box>
+        <Text color="red">An error occurred while fetching customers.</Text>
+      </Box>
+    )
+  } else if (!customers.data) {
+    return (
+      <Box>
+        <Text>Loading...</Text>
+      </Box>
+    )
+  } else {
+    return (
+      <CustomerTable customers={customers} columns={columns} />
+    )
+  }
+}
+
 const HomePage: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ fallback }) => {
+  const [showFilter, setShowFilter] = useState(false)
+  const [columns, setColumns] = useState<CustomerTableAvailableColumns>(defaultColumns)
+
   // Load providers
   const { currentUser, logOut } = useAuth()
   const router = useRouter()
   const toast = useToast()
 
   // Fetch customers from APIs
-  const { data: customers, error: customersError, isValidating } = useSWR<CustomersApiResponse>(
+  const swrCustomers = useSWR<CustomersApiResponse>(
     '/api/customers',
     swrFetcher
   )
 
   useEffect(() => {
-    if (customersError) {
+    if (swrCustomers.error) {
       toast({
         title: 'Error',
         description: 'An error occurred while fetching customers.',
@@ -87,8 +138,16 @@ const HomePage: NextPage<
         isClosable: true,
       })
     }
-  }, [customersError, isValidating, toast])
+  }, [swrCustomers.data, swrCustomers.error, toast])
 
+  // Persist user columns settings
+  useEffect(() => {
+    // Load columns from local storage
+    const columns = localStorage.getItem('columns')
+    if (columns) {
+      setColumns(JSON.parse(columns))
+    }
+  }, [])
 
   return (
     <SWRConfig value={{ fallback }}>
@@ -110,11 +169,61 @@ const HomePage: NextPage<
         }
       />
       <Box marginTop={'60px'} p={6}>
-        <Heading>Customers: {customers?.data?.customers.length || "loading..."}</Heading>
-        <CustomerTable />
+        <HStack>
+          <Heading>View customers</Heading>
+          <Popover
+            isOpen={showFilter}
+            onClose={() => {
+              // Close popover
+              setShowFilter(false)
+
+              // Persist columns to local storage
+              localStorage.setItem('columns', JSON.stringify(columns))
+            }}
+            placement="right-end"
+            closeOnBlur={true}
+          >
+            <PopoverTrigger>
+              <IconButton
+                icon={<FiFilter />}
+                aria-label="Settings"
+                onClick={() => setShowFilter(!showFilter)}
+              />
+            </PopoverTrigger>
+            <PopoverContent>
+              <PopoverArrow />
+              <PopoverCloseButton />
+
+              <PopoverHeader>Columns</PopoverHeader>
+
+              <PopoverBody>
+                {/* List of checkboxes for each column */}
+                {allPossibleColumns.map((column) => (
+                  <Box key={column}>
+                    <Checkbox
+                      isChecked={columns.includes(column)}
+                      disabled={columns.length === 1 && columns.includes(column)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setColumns([...columns, column])
+                        } else {
+                          setColumns(columns.filter((c) => c !== column))
+                        }
+                      }}
+                    >
+                      {column}
+                    </Checkbox>
+                  </Box>
+                ))}
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
+        </HStack>
+
+        {/* Actual data table */}
+        <SWRCustomerTable customers={swrCustomers} columns={columns} />
       </Box>
     </SWRConfig>
   )
 }
-
 export default HomePage
