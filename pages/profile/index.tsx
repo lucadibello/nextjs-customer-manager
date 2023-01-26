@@ -21,7 +21,8 @@ const ProfilePage = () => {
     isAuthenticated,
     accessToken,
     refreshToken,
-    changePassword
+    changePassword,
+    hasRole
   } = useAuth()
 
   const router = useRouter()
@@ -153,12 +154,12 @@ const ProfilePage = () => {
               <Tooltip
                 hasArrow
                 shouldWrapChildren
-                label={'Refresh access token'}
+                label={!hasRole("MANAGER") ? "You must be a manager to refresh the access token!" : "Refresh access token"}
               >
                 <IconButton
                   aria-label="Refresh access token"
                   icon={<FiRefreshCcw />}
-                  disabled={isTokenRefreshing}
+                  disabled={isTokenRefreshing || !hasRole("MANAGER")}
                   onClick={() => {
                     setIsTokenRefreshing(true)
                     refreshSession()
@@ -183,33 +184,36 @@ const ProfilePage = () => {
                 />
               </Tooltip>
             </HStack>
-            <HStack mt={5} gap={10}>
-              <Text fontWeight={'bold'}>Refresh token:</Text>
-              <Text maxWidth={'60%'}>{refreshToken}</Text>
 
-              {refreshToken && (
-                <CopyButton
-                  value={refreshToken}
-                  label={'Copy refresh token'}
-                  onSuccessfulCopy={() => {
-                    toast({
-                      title: 'Copied refresh token',
-                      status: 'success',
-                      duration: 3000,
-                      isClosable: true,
-                    })
-                  }}
-                  onFailedCopy={() => {
-                    toast({
-                      title: 'Failed to copy refresh token',
-                      status: 'error',
-                      duration: 3000,
-                      isClosable: true,
-                    })
-                  }}
-                />
-              )}
-            </HStack>
+            {hasRole("MANAGER") && (
+              <HStack mt={5} gap={10}>
+                <Text fontWeight={'bold'}>Refresh token:</Text>
+                <Text maxWidth={'60%'}>{refreshToken}</Text>
+
+                {refreshToken && (
+                  <CopyButton
+                    value={refreshToken}
+                    label={'Copy refresh token'}
+                    onSuccessfulCopy={() => {
+                      toast({
+                        title: 'Copied refresh token',
+                        status: 'success',
+                        duration: 3000,
+                        isClosable: true,
+                      })
+                    }}
+                    onFailedCopy={() => {
+                      toast({
+                        title: 'Failed to copy refresh token',
+                        status: 'error',
+                        duration: 3000,
+                        isClosable: true,
+                      })
+                    }}
+                  />
+                )}
+              </HStack>
+            )}
           </>
         ) : (
           <Text fontSize="xl">You are not logged in</Text>

@@ -12,7 +12,8 @@ import { ApiResponse } from '../lib/types/api'
 const fetcher = <T extends ApiResponse<any>>(
   url: string,
   data: object | null = null,
-  isRetrying = false
+  isRetrying = false,
+  onErrorNewAuthNeeded?: () => void
 ): Promise<T> => {
   // Check if we are sending data
   return fetch(url, {
@@ -26,6 +27,7 @@ const fetcher = <T extends ApiResponse<any>>(
     if (res.status == 498) {
       // If not, check if we are already retrying
       if (isRetrying) {
+        onErrorNewAuthNeeded && onErrorNewAuthNeeded()
         throw new Error('Unable to refresh token')
       }
 
@@ -52,11 +54,13 @@ const fetcher = <T extends ApiResponse<any>>(
               // Retry the request
               return fetcher<T>(url, data, true)
             } else {
+              onErrorNewAuthNeeded && onErrorNewAuthNeeded()
               throw new Error('Unable to refresh token')
             }
           })
           .catch(() => {
             // Redirect to login page if refresh token is invalid
+            onErrorNewAuthNeeded && onErrorNewAuthNeeded()
             throw new Error('Unable to refresh token')
           })
       } else {
@@ -65,6 +69,10 @@ const fetcher = <T extends ApiResponse<any>>(
     } else {
       const responseJson: T = await res.json()
       if (!responseJson.success) {
+        // Check if response code is 401 (unauthorized)
+        if (res.status == 401) {
+          onErrorNewAuthNeeded && onErrorNewAuthNeeded()
+        }
         throw new Error(responseJson.message)
       }
       return responseJson
@@ -72,7 +80,10 @@ const fetcher = <T extends ApiResponse<any>>(
   })
 }
 
-export const swrFetcher = <T extends ApiResponse<any>>(url: string) =>
-  fetcher<T>(url)
+export const swrFetcher = <T extends ApiResponse<any>>(
+  url: string,
+  onAuthNeeded?: () => void
+) =>
+  onAuthNeeded ? fetcher<T>(url, null, false, onAuthNeeded) : fetcher<T>(url)
 
 export default fetcher

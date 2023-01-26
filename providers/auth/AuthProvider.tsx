@@ -3,21 +3,7 @@ import { ChangePasswordApiResponse, UserSession } from '../../lib/types/auth'
 import { LoginApiResponse, RefreshApiResponse } from '../../pages/login/login'
 import fetcher from '../../util/fetcher'
 import { setCookie } from 'cookies-next'
-
-interface AuthContextData {
-  isAuthenticated: boolean
-  currentUser: UserSession | null
-  accessToken: string | null
-  refreshToken: string | null
-  logIn: (_data: LoginData) => Promise<void>
-  logOut: () => void
-  refreshSession: () => Promise<void>
-  changePassword: (_otp: string, _newPassword: string) => Promise<void>
-}
-
-interface AuthProviderProps {
-  children: React.ReactNode
-}
+import { Role } from '@prisma/client'
 
 const AuthContext = createContext<AuthContextData>({
   isAuthenticated: false,
@@ -28,6 +14,7 @@ const AuthContext = createContext<AuthContextData>({
   logOut: () => { },
   refreshSession: () => Promise.resolve(),
   changePassword: () => Promise.resolve(),
+  hasRole: () => false,
 })
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -197,6 +184,13 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     })
   }
 
+  const hasRole = (role: Role) => {
+    if (currentUser) {
+      return currentUser.role === role
+    }
+    return false
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -208,6 +202,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         refreshToken,
         accessToken,
         changePassword,
+        hasRole
       }}
     >
       {children}

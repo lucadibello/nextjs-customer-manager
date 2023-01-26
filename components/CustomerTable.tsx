@@ -44,5 +44,4 @@ const CustomerTable = ({ customers, columns }: ICustomerTableProps) => {
   )
 }
 
-
 export default CustomerTable

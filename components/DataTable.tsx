@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Thead, Tbody, Tr, Th, Td, chakra, Icon, Box, Input, ButtonGroup, IconButton, HStack, Text, TableContainer } from "@chakra-ui/react";
+import { Table, Thead, Tbody, Tr, Th, Td, chakra, Icon, Box, Input, ButtonGroup, IconButton, HStack, Text, TableContainer, Tooltip } from "@chakra-ui/react";
 import {
   useReactTable,
   flexRender,
@@ -92,35 +92,43 @@ export function DataTable<Data extends object>({
       </TableContainer>
 
       {/* Table controls */}
-      <HStack>
+      <HStack marginTop={3}>
         <ButtonGroup isAttached borderRight={"1px solid black"} paddingRight={3}>
-          <IconButton
-            icon={<FiArrowLeftCircle />}
-            aria-label="Go to first page"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          />
+          <Tooltip label="Go to first page" isDisabled={!table.getCanPreviousPage()}>
+            <IconButton
+              icon={<FiArrowLeftCircle />}
+              aria-label="Go to first page"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            />
+          </Tooltip>
 
-          <IconButton
-            icon={<FiArrowLeft />}
-            aria-label="Go to previous page"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          />
+          <Tooltip label="Go to previous page" isDisabled={!table.getCanPreviousPage()}>
+            <IconButton
+              icon={<FiArrowLeft />}
+              aria-label="Go to previous page"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            />
+          </Tooltip>
 
-          <IconButton
-            icon={<FiArrowRight />}
-            aria-label="Go to next page"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          />
+          <Tooltip label="Go to next page" isDisabled={!table.getCanNextPage()}>
+            <IconButton
+              icon={<FiArrowRight />}
+              aria-label="Go to next page"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            />
+          </Tooltip>
 
-          <IconButton
-            icon={<FiArrowRightCircle />}
-            aria-label="Go to last page"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          />
+          <Tooltip label="Go to last page" isDisabled={!table.getCanNextPage()}>
+            <IconButton
+              icon={<FiArrowRightCircle />}
+              aria-label="Go to last page"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            />
+          </Tooltip>
         </ButtonGroup>
 
         <Text> Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</Text>
