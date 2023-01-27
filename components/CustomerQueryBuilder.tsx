@@ -15,6 +15,7 @@ import {
   PopoverHeader,
   PopoverTrigger,
   Text,
+  usePopoverContext,
   VStack
 } from "@chakra-ui/react"
 import { Customer } from "@prisma/client"
@@ -127,54 +128,73 @@ const possibleOperations: InputQueryKind[] = [
   },
 ]
 
+const PopoverCloseOnClickArea = ({ children }: { children: React.ReactNode }) => {
+  // Load popover context
+  const popover = usePopoverContext()
+
+  return (
+    <Box
+      onClick={() => {
+        popover.onClose()
+      }}
+    >
+      {children}
+    </Box>
+  )
+}
+
 const AddQueryElementMenu = <T,>({ title, options, onSelect, stringify }: { title: string, options: T[], onSelect: (_choise: T) => void, stringify: (_value: T) => string }) => {
   return (
-    <Box>
-      <Popover
-        placement="top"
-        variant={"solid"}
-      >
-        <PopoverTrigger>
-          <IconButton
-            icon={<FiPlus />}
-            aria-label="Add query element"
-            size="md"
+    <Popover
+      placement="auto"
+      variant={"solid"}
 
-            // Material design ripple effect + hover effect + color
-            _hover={{
-              bg: "blue.100",
-              color: "blue.800",
-            }}
-            _active={{
-              bg: "blue.200",
-              color: "blue.800",
-            }}
+    // If on mobile, use full screen popover
 
-            // Remove focus outline
-            _focus={{
-              outline: "none",
-            }}
+    // Remove focus outline
 
-            // Ripple effect with plain CSS
-            colorScheme="blue"
-          />
-        </PopoverTrigger>
-        <PopoverContent color='white' bg='blue.800' borderColor='blue.800'>
-          <PopoverArrow bg='blue.800' borderColor='blue.800' />
-          <PopoverCloseButton />
-          <PopoverHeader>{title}</PopoverHeader>
-          <PopoverBody>
+    >
+      <PopoverTrigger>
+        <IconButton
+          icon={<FiPlus />}
+          aria-label="Add query element"
+          size="md"
+
+          // Material design ripple effect + hover effect + color
+          _hover={{
+            bg: "blue.100",
+            color: "blue.800",
+          }}
+          _active={{
+            bg: "blue.200",
+            color: "blue.800",
+          }}
+
+          // Remove focus outline
+          _focus={{
+            outline: "none",
+          }}
+
+          // Ripple effect with plain CSS
+          colorScheme="blue"
+        />
+      </PopoverTrigger>
+      <PopoverContent color='white' bg='blue.800' borderColor='blue.800'>
+        <PopoverArrow bg='blue.800' borderColor='blue.800' />
+        <PopoverCloseButton />
+        <PopoverHeader fontWeight={'bold'}>{title}</PopoverHeader>
+        <PopoverBody
+          // Enable scrollbar y if too many options
+          overflowY="auto"
+          maxH={200}
+        >
+          <PopoverCloseOnClickArea>
             {options.map((option, idx) => (
               <Text
                 key={idx}
-                onClick={() => {
-                  // Close popover
-                  const popover = document.querySelector(".chakra-popover__content")
-                  if (popover) {
-                    popover.classList.remove("chakra-popover__content--open")
-                  }
-                  onSelect(option)
-                }}
+                cursor="pointer"
+                onClick={() => onSelect(option)}
+                height={10}
                 _hover={{
                   bg: "blue.100",
                   color: "blue.800",
@@ -187,10 +207,10 @@ const AddQueryElementMenu = <T,>({ title, options, onSelect, stringify }: { titl
                 {stringify(option)}
               </Text>
             ))}
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
-    </Box>
+          </PopoverCloseOnClickArea>
+        </PopoverBody>
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -298,7 +318,7 @@ const CustomerQueryBuilder = ({ queryFields, onQueryGenerated }: CustomerQueryBu
 
       <Flex width={"150px"} justifyContent={"center"}>
         <AddQueryElementMenu
-          title="Add field"
+          title="Create a new filter on a table field"
           options={availableFields}
           onSelect={(selectedField) => {
             const newField: QueryField = {
@@ -319,7 +339,15 @@ const FieldQueryBuilder = ({ field, possibleOperations, onQueryUpdate }: FieldQu
   const [operations, setOperations] = useState<QueryOperation[]>([])
 
   return (
-    <HStack gap={2}>
+    <HStack
+      gap={2}
+
+      // Enable y axis scrolling if there are too many operations
+      overflowY={"auto"}
+      height={"auto"}
+      maxH={"200px"}
+      width={"100%"}
+    >
       <QueryElement backgroundColor={field.color} text={field.name} />
 
       {operations?.map((operation, idx) => (
@@ -346,11 +374,9 @@ const FieldQueryBuilder = ({ field, possibleOperations, onQueryUpdate }: FieldQu
                   // Look for this operation in the array and update it
                   const newOperations = [...operations]
                   newOperations[idx].value = e.target.value
+                  // Save changes
                   setOperations(newOperations)
-                }}
-                onBlur={() => {
-                  // Commit the changes
-                  onQueryUpdate(operations)
+                  onQueryUpdate(newOperations)
                 }}
               />
             </FormControl>

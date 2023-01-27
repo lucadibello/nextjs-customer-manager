@@ -9,14 +9,12 @@ const DEFAULT_TIMEOUT = 2 * 60 * 1000 // Two minutes
 const AllProviders = ({ children }: { children: ReactNode }) => {
   // Load useToast hook to show toast
   const toast = useToast()
-
   return (
     <AuthProvider>
       <AuthChallengeProvider>
         <IdleProvider
-          disable={true}
           timeout={DEFAULT_TIMEOUT}
-          debug={true}
+          debug={false}
           logoutOnTimeout={true}
           callback={() => {
             toast({
@@ -26,6 +24,9 @@ const AllProviders = ({ children }: { children: ReactNode }) => {
               duration: 5000,
               isClosable: true,
             })
+
+            // set localStorage flag to show a notifcation in login page
+            localStorage.setItem('sessionExpired', 'true')
           }}>
           {children}
         </IdleProvider>

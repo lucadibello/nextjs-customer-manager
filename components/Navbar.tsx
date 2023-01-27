@@ -28,16 +28,18 @@ const Navbar = ({ leftComponent, rightComponent, homeURL }: INavbarProps) => {
         >
           {/* APP LOGO */}
           <Link href={homeURL}>
-            <Heading
-              as="h1"
-              fontSize={'25'}
-              color="white"
-              fontFamily={['Roboto', 'sans-serif']}
-              wordBreak="keep-all"
-              whiteSpace={'nowrap'}
-            >
-              JWT Authentication
-            </Heading>
+            <Box>
+              <Heading
+                as="h1"
+                fontSize={'25'}
+                color="white"
+                fontFamily={['Roboto', 'sans-serif']}
+                wordBreak="keep-all"
+                whiteSpace={'nowrap'}
+              >
+                Customer Manager
+              </Heading>
+            </Box>
           </Link>
 
           {/* LEFT COMPONENT */}

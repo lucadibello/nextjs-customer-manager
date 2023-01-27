@@ -160,24 +160,25 @@ const HomePage: NextPage<
 
   return (
     <SWRConfig value={{ fallback }}>
-      <Navbar
-        homeURL="/"
-        rightComponent={
-          currentUser && [
-            <NavbarProfile
-              currentUser={currentUser}
-              onLogOut={() => {
-                // log out
-                logOut()
-                // redirect to home page
-                router.push('/')
-              }}
-              key="avatar"
-            />,
-          ]
-        }
-      />
       <Box marginTop={'60px'} p={6}>
+        <Navbar
+          homeURL="/"
+          rightComponent={
+            currentUser && [
+              <NavbarProfile
+                currentUser={currentUser}
+                onLogOut={() => {
+                  // log out
+                  logOut()
+                  // redirect to home page
+                  router.push('/')
+                }}
+                key="avatar"
+              />,
+            ]
+          }
+        />
+
         <HStack>
           <Heading>
             View customers
@@ -192,7 +193,7 @@ const HomePage: NextPage<
                 // Persist columns to local storage
                 localStorage.setItem('columns', JSON.stringify(columns))
               }}
-              placement="right-end"
+              placement="auto-start"
               closeOnBlur={true}
             >
               <PopoverTrigger>
@@ -242,6 +243,9 @@ const HomePage: NextPage<
         <Box>
           {swrCustomers.data && swrCustomers.data.data && swrCustomers.data.data.customers && (
             <HStack>
+              {filtersEnabled && (
+                <Badge color={"green"}>Filters enabled</Badge>
+              )}
               <Badge color={"green"}>Loaded: {swrCustomers.data.data.customers.length} rows</Badge>
               <Tooltip label="Refresh customer data">
                 <IconButton
@@ -342,7 +346,7 @@ const HomePage: NextPage<
           isValidating: false,
           mutate: swrCustomers.mutate,
         } : swrCustomers} columns={columns} />
-      </Box>
+      </Box >
     </SWRConfig >
   )
 }

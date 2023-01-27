@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useForm } from 'react-hook-form'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
@@ -21,6 +21,7 @@ import { useAuth } from '../../providers/auth/AuthProvider'
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [showExpiredNotice, setShowExpiredNotice] = useState<boolean>(false)
 
   // React hook form
   const {
@@ -32,6 +33,14 @@ const LoginPage = () => {
   const toast = useToast()
   const router = useRouter()
   const { logIn } = useAuth()
+
+  useEffect(() => {
+    // Check if expiredSession flag is set
+    if (localStorage.getItem('sessionExpired') === 'true' && !showExpiredNotice) {
+      setShowExpiredNotice(true)
+      localStorage.removeItem('sessionExpired')
+    }
+  }, [showExpiredNotice])
 
   const onSubmit = async (data: LoginData) => {
     await logIn(data)
@@ -63,6 +72,13 @@ const LoginPage = () => {
       <Heading as="h1" size="2xl">
         Log In
       </Heading>
+
+      {showExpiredNotice && (
+        <Text fontSize="sm" color="red.500">
+          Your session has expired. Please log in again.
+        </Text>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormControl isInvalid={!!errors.email}>
           <Input

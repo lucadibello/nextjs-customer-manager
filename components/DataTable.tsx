@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Thead, Tbody, Tr, Th, Td, chakra, Icon, Box, Input, ButtonGroup, IconButton, HStack, Text, TableContainer, Tooltip } from "@chakra-ui/react";
+import { Table, Thead, Tbody, Tr, Th, Td, chakra, Icon, Box, Input, ButtonGroup, IconButton, HStack, Text, TableContainer, Tooltip, Stack } from "@chakra-ui/react";
 import {
   useReactTable,
   flexRender,
@@ -93,7 +93,7 @@ export function DataTable<Data extends object>({
 
       {/* Table controls */}
       <HStack marginTop={3}>
-        <ButtonGroup isAttached borderRight={"1px solid black"} paddingRight={3}>
+        <ButtonGroup isAttached paddingRight={3}>
           <Tooltip label="Go to first page" isDisabled={!table.getCanPreviousPage()}>
             <IconButton
               icon={<FiArrowLeftCircle />}
@@ -130,31 +130,50 @@ export function DataTable<Data extends object>({
             />
           </Tooltip>
         </ButtonGroup>
+        <Stack
+          // On mobile, the pagination controls should be stacked
+          direction={["column", "row"]}
+          alignItems="center"
+          justifyContent="center"
 
-        <Text> Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</Text>
-        <HStack>
-          <Text>Go to page:</Text>
-          <Input
-            type="number"
-            isInvalid={!inputValid}
-            _focus={!inputValid ? { borderColor: "red.500", boxShadow: "box-shadow: 0 0 0 1px #E53E3E;" } : {}}
-            defaultValue={table.getState().pagination.pageIndex + 1}
-            onChange={(e) => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
+          // Border left on mobile
+          borderLeft={["1px solid black", "none"]}
+          paddingLeft={[3, 0]}
+          marginLeft={[3, 0]}
 
-              // Check if page is valid
-              if (page < 0 || page > table.getPageCount() - 1) {
-                setInputValid(false);
-              } else {
-                setInputValid(true);
-                table.setPageIndex(page);
-              }
-            }}
-            min={1}
-            max={table.getPageCount()}
-            w="60px"
-          />
-        </HStack>
+          // Border top on desktop
+          borderTop={["none", "1px solid black"]}
+          paddingTop={[0, 3]}
+          marginTop={[0, 3]}
+        >
+          <Text>Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</Text>
+          <HStack
+
+                  
+          >
+            <Text>Go to page:</Text>
+            <Input
+              type="number"
+              isInvalid={!inputValid}
+              _focus={!inputValid ? { borderColor: "red.500", boxShadow: "box-shadow: 0 0 0 1px #E53E3E;" } : {}}
+              defaultValue={table.getState().pagination.pageIndex + 1}
+              onChange={(e) => {
+                const page = e.target.value ? Number(e.target.value) - 1 : 0;
+
+                // Check if page is valid
+                if (page < 0 || page > table.getPageCount() - 1) {
+                  setInputValid(false);
+                } else {
+                  setInputValid(true);
+                  table.setPageIndex(page);
+                }
+              }}
+              min={1}
+              max={table.getPageCount()}
+              w="60px"
+            />
+          </HStack>
+        </Stack>
       </HStack>
     </Box >
   );
