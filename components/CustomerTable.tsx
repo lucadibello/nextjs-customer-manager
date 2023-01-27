@@ -1,13 +1,11 @@
 import { Box } from "@chakra-ui/react"
-import { SWRResponse } from "swr"
-import { CustomersApiResponse } from "../lib/types/apis/customers"
 import { createColumnHelper, DeepKeys } from '@tanstack/react-table'
 import { Customer } from "@prisma/client"
 import { DataTable } from "./DataTable"
 
 export type CustomerTableAvailableColumns = Array<keyof Customer>
 interface ICustomerTableProps {
-  customers: SWRResponse<CustomersApiResponse>
+  customers: Customer[]
   columns: CustomerTableAvailableColumns
 }
 
@@ -37,7 +35,7 @@ const CustomerTable = ({ customers, columns }: ICustomerTableProps) => {
   return (
     <Box>
       <DataTable
-        data={customers.data?.data?.customers || []}
+        data={customers}
         columns={generateColumns(columns)}
       />
     </Box>
