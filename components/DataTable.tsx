@@ -74,6 +74,14 @@ export function DataTable<Data extends object>({
             ))}
           </Thead>
           <Tbody>
+            {table.getRowModel().rows.length === 0 && (
+              <Tr>
+                <Text textAlign="center" padding={3} color="red">
+                  No data available.
+                </Text>
+              </Tr>
+            )}
+
             {table.getRowModel().rows.map((row) => (
               <Tr key={row.id}>
                 {row.getVisibleCells().map((cell) => {
@@ -147,10 +155,7 @@ export function DataTable<Data extends object>({
           marginTop={[0, 3]}
         >
           <Text>Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</Text>
-          <HStack
-
-                  
-          >
+          <HStack>
             <Text>Go to page:</Text>
             <Input
               type="number"

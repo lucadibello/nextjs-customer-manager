@@ -33,7 +33,6 @@ const Navbar = ({ leftComponent, rightComponent, homeURL }: INavbarProps) => {
                 as="h1"
                 fontSize={'25'}
                 color="white"
-                fontFamily={['Roboto', 'sans-serif']}
                 wordBreak="keep-all"
                 whiteSpace={'nowrap'}
               >

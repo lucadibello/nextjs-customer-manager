@@ -15,7 +15,6 @@ import {
   PopoverHeader,
   Divider,
   Badge,
-  Tooltip,
 } from '@chakra-ui/react'
 import { Customer } from '@prisma/client'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -247,18 +246,25 @@ const HomePage: NextPage<
                 <Badge color={"green"}>Filters enabled</Badge>
               )}
               <Badge color={"green"}>Loaded: {swrCustomers.data.data.customers.length} rows</Badge>
-              <Tooltip label="Refresh customer data">
-                <IconButton
-                  icon={<FiRefreshCw />}
-                  aria-label="Refresh"
-                  size={"xs"}
-                  variant={"ghost"}
-                  isLoading={swrCustomers.isValidating}
-                  onClick={() => {
-                    swrCustomers.mutate()
-                  }}
-                />
-              </Tooltip>
+              <IconButton
+                icon={<FiRefreshCw />}
+                aria-label="Refresh"
+                size={"xs"}
+                variant={"ghost"}
+                isLoading={swrCustomers.isValidating}
+                onClick={() => {
+                  // Mutate data
+                  swrCustomers.mutate()
+                  // Show toast
+                  toast({
+                    title: 'Refreshed',
+                    description: 'Customers have been refreshed.',
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                  })
+                }}
+              />
             </HStack>
           )}
 

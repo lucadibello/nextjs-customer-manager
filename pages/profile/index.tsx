@@ -29,6 +29,15 @@ const ProfilePage = () => {
   const toast = useToast()
   const { triggerAuthChallenge, purgeAll, isPending, otp, errorMessage } = useAuthChallenge();
 
+  const limitJwtSize = (jwt: string) => {
+    const jwtParts = jwt.split(".")
+    const jwtHeader = jwtParts[0]
+    const jwtPayload = jwtParts[1]
+    const jwtSignature = jwtParts[2]
+
+    return `${jwtHeader}.${jwtPayload.substr(0, 10)}...${jwtSignature.substr(0, 10)}...`
+  }
+
 
   // Wait for the OTP to be generated
   useEffect(() => {
@@ -76,7 +85,7 @@ const ProfilePage = () => {
   }, [isUserChangingPassword, errorMessage, otp, purgeAll, toast, isPending, newUserPassword, changePassword])
 
   return (
-    <Box>
+    <Box marginTop={'60px'} p={6}>
       <Navbar
         homeURL="/"
         rightComponent={
@@ -95,12 +104,12 @@ const ProfilePage = () => {
         }
       />
 
-      <Box marginTop={'60px'} p={6}>
-        <Heading>Your profile</Heading>
-        <Divider mb={5} />
+      <Heading>Your profile</Heading>
+      <Divider mb={5} />
 
-        {currentUser ? (
-          <>
+      {currentUser ? (
+        <>
+          <Box>
             <HStack>
               <Text fontWeight={'bold'}>User ID</Text>
               <Text>{currentUser.id}</Text>
@@ -123,18 +132,80 @@ const ProfilePage = () => {
               <Text fontWeight={'bold'}>Is manager?</Text>
               <Text>{currentUser.role == 'MANAGER' ? 'Yes' : 'No'}</Text>
             </HStack>
-            <Heading mt={5}>JWT tokens</Heading>
-            <Divider mb={5} />
-            <HStack mt={5} gap={10}>
-              <Text fontWeight={'bold'}>Access token:</Text>
-              <Text maxWidth={'60%'}>{accessToken}</Text>
-              {accessToken && (
+          </Box>
+
+          {/* JWT tokens */}
+          <Heading mt={5}>JWT tokens</Heading>
+          <Divider mb={5} />
+          <Text fontWeight={'bold'}>Access token: {accessToken ? limitJwtSize(accessToken) : "Access token not set"}</Text>
+
+          {accessToken && (
+            <CopyButton
+              value={accessToken}
+              label={'Copy access token'}
+              onSuccessfulCopy={() => {
+                toast({
+                  title: 'Copied access token',
+                  status: 'success',
+                  duration: 3000,
+                  isClosable: true,
+                })
+              }}
+              onFailedCopy={() => {
+                toast({
+                  title: 'Failed to copy access token',
+                  status: 'error',
+                  duration: 3000,
+                  isClosable: true,
+                })
+              }}
+            />
+          )}
+
+          <Tooltip
+            hasArrow
+            shouldWrapChildren
+            label={!hasRole("MANAGER") ? "You must be a manager to refresh the access token!" : "Refresh access token"}
+          >
+            <IconButton
+              aria-label="Refresh access token"
+              icon={<FiRefreshCcw />}
+              disabled={isTokenRefreshing || !hasRole("MANAGER")}
+              onClick={() => {
+                setIsTokenRefreshing(true)
+                refreshSession()
+                  .then(() => {
+                    toast({
+                      title: 'Refreshed access token',
+                      status: 'success',
+                      duration: 3000,
+                      isClosable: true,
+                    })
+                  })
+                  .catch(() => {
+                    toast({
+                      title: 'Failed to refresh access token',
+                      status: 'error',
+                      duration: 3000,
+                      isClosable: true,
+                    })
+                  })
+                  .finally(() => setIsTokenRefreshing(false))
+              }}
+            />
+          </Tooltip>
+
+          {hasRole("MANAGER") && (
+            <>
+              <Text fontWeight={'bold'}>Refresh token: {refreshToken ? limitJwtSize(refreshToken) : "Access token not set"}</Text>
+
+              {refreshToken && (
                 <CopyButton
-                  value={accessToken}
-                  label={'Copy access token'}
+                  value={refreshToken}
+                  label={'Copy refresh token'}
                   onSuccessfulCopy={() => {
                     toast({
-                      title: 'Copied access token',
+                      title: 'Copied refresh token',
                       status: 'success',
                       duration: 3000,
                       isClosable: true,
@@ -142,7 +213,7 @@ const ProfilePage = () => {
                   }}
                   onFailedCopy={() => {
                     toast({
-                      title: 'Failed to copy access token',
+                      title: 'Failed to copy refresh token',
                       status: 'error',
                       duration: 3000,
                       isClosable: true,
@@ -150,92 +221,30 @@ const ProfilePage = () => {
                   }}
                 />
               )}
+            </>
+          )}
+        </>
+      ) : (
+        <Text fontSize="xl">You are not logged in</Text>
+      )
+      }
 
-              <Tooltip
-                hasArrow
-                shouldWrapChildren
-                label={!hasRole("MANAGER") ? "You must be a manager to refresh the access token!" : "Refresh access token"}
-              >
-                <IconButton
-                  aria-label="Refresh access token"
-                  icon={<FiRefreshCcw />}
-                  disabled={isTokenRefreshing || !hasRole("MANAGER")}
-                  onClick={() => {
-                    setIsTokenRefreshing(true)
-                    refreshSession()
-                      .then(() => {
-                        toast({
-                          title: 'Refreshed access token',
-                          status: 'success',
-                          duration: 3000,
-                          isClosable: true,
-                        })
-                      })
-                      .catch(() => {
-                        toast({
-                          title: 'Failed to refresh access token',
-                          status: 'error',
-                          duration: 3000,
-                          isClosable: true,
-                        })
-                      })
-                      .finally(() => setIsTokenRefreshing(false))
-                  }}
-                />
-              </Tooltip>
-            </HStack>
+      <Heading>Change password</Heading>
+      <Divider mb={5} />
 
-            {hasRole("MANAGER") && (
-              <HStack mt={5} gap={10}>
-                <Text fontWeight={'bold'}>Refresh token:</Text>
-                <Text maxWidth={'60%'}>{refreshToken}</Text>
+      {/* Two fields, one to confirm the current password, and one to insert the new password */}
+      <Box minWidth={"50%"}>
+        <ChangePasswordForm
+          isLoading={isPending}
+          onSuccess={(newPassword: string) => {
+            // Set global state to true
+            setIsUserChangingPassword(true)
+            setNewUserPassword(newPassword)
 
-                {refreshToken && (
-                  <CopyButton
-                    value={refreshToken}
-                    label={'Copy refresh token'}
-                    onSuccessfulCopy={() => {
-                      toast({
-                        title: 'Copied refresh token',
-                        status: 'success',
-                        duration: 3000,
-                        isClosable: true,
-                      })
-                    }}
-                    onFailedCopy={() => {
-                      toast({
-                        title: 'Failed to copy refresh token',
-                        status: 'error',
-                        duration: 3000,
-                        isClosable: true,
-                      })
-                    }}
-                  />
-                )}
-              </HStack>
-            )}
-          </>
-        ) : (
-          <Text fontSize="xl">You are not logged in</Text>
-        )}
-
-        <Heading>Change password</Heading>
-        <Divider mb={5} />
-
-        {/* Two fields, one to confirm the current password, and one to insert the new password */}
-        <Box minWidth={"50%"}>
-          <ChangePasswordForm
-            isLoading={isPending}
-            onSuccess={(newPassword: string) => {
-              // Set global state to true
-              setIsUserChangingPassword(true)
-              setNewUserPassword(newPassword)
-
-              // Start the authentication challenge
-              triggerAuthChallenge()
-            }}
-          />
-        </Box>
+            // Start the authentication challenge
+            triggerAuthChallenge()
+          }}
+        />
       </Box>
     </Box >
   )
