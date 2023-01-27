@@ -17,11 +17,14 @@ import {
   Badge,
   Tooltip,
 } from '@chakra-ui/react'
+import { Customer } from '@prisma/client'
+import { AnimatePresence, motion } from 'framer-motion'
 import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { FiFilter, FiRefreshCw } from 'react-icons/fi'
 import useSWR, { SWRConfig, SWRResponse } from 'swr'
+import CustomerQueryBuilder from '../components/CustomerQueryBuilder'
 import CustomerTable, { CustomerTableAvailableColumns, defaultColumns } from '../components/CustomerTable'
 import Navbar from '../components/Navbar'
 import NavbarProfile from '../components/NavbarProfile'
@@ -108,7 +111,7 @@ const SWRCustomerTable = ({ customers, columns }: { customers: SWRResponse<Custo
     )
   } else {
     return (
-      <CustomerTable customers={customers} columns={columns} />
+      <CustomerTable customers={customers.data.data?.customers || []} columns={columns} />
     )
   }
 }
@@ -118,6 +121,9 @@ const HomePage: NextPage<
 > = ({ fallback }) => {
   const [showFilter, setShowFilter] = useState(false)
   const [columns, setColumns] = useState<CustomerTableAvailableColumns>(defaultColumns)
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([])
+  const [filtersEnabled, setFiltersEnabled] = useState(false)
 
   // Load providers
   const { currentUser, logOut } = useAuth()
@@ -259,19 +265,83 @@ const HomePage: NextPage<
 
         <Divider borderBottomColor={"black"} marginTop={2} marginBottom={"20px"} />
 
-        {/* Actual data table */}
-        <SWRCustomerTable customers={swrCustomers} columns={columns} />
-
         { /* Additional settings */}
-        <Box marginTop={"20px"}>
-          <Heading size={"md"}>Modular filters</Heading>
-          <Divider borderBottomColor={"black"} marginTop={2} marginBottom={"20px"} />
+        <Box marginTop={"20px"} marginBottom={10}>
+          <HStack>
+            <Heading size={"md"}>Modular filters</Heading>
+
+            {/* Toggle filters */}
+            <Checkbox
+              isChecked={showAdvancedFilters}
+              onChange={(e) => {
+
+                // If filters are enabled, reset filters
+                if (e.target.checked === false) {
+                  setShowAdvancedFilters(false)
+                } else {
+                  setShowAdvancedFilters(true)
+                }
+                setFiltersEnabled(false)
+              }}
+            >
+              Enable filters
+            </Checkbox>
+          </HStack>
 
 
-          <Box>
-            <Text>SWR fallback: {fallback ? 'true' : 'false'}</Text>
-          </Box>
+          <AnimatePresence>
+            {showAdvancedFilters && (
+              <Box
+                as={motion.div}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <Box>
+                  <Text>Build your own query using this dynamic query builder.</Text>
+
+                  <Box p={4}>
+                    <CustomerQueryBuilder
+                      queryFields={allPossibleColumns}
+                      onQueryGenerated={(dataFilters) => {
+                        if (dataFilters.length > 0 && swrCustomers.data && swrCustomers.data.data && swrCustomers.data.data.customers) {
+                          // Filter customers (valid if all dataFilters are true for a customer)
+
+                          // Enable filters if disabled
+                          !filtersEnabled && setFiltersEnabled(true)
+
+                          const filteredCustomers = swrCustomers.data.data.customers.filter((customer) => {
+                            console.log(customer, dataFilters.every((dataFilter) => dataFilter(customer)))
+                            return dataFilters.every((dataFilter) => dataFilter(customer))
+                          })
+                          // Set filtered customers
+                          setFilteredCustomers(filteredCustomers)
+                        } else {
+                          setFiltersEnabled(false)
+                          setFilteredCustomers([])
+                        }
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+            )}
+          </AnimatePresence>
         </Box>
+
+        {/* Actual data table */}
+        <SWRCustomerTable customers={showAdvancedFilters && filtersEnabled ? {
+          error: undefined,
+          data: {
+            success: true,
+            data: {
+              customers: filteredCustomers
+            },
+            message: undefined
+          },
+          isValidating: false,
+          mutate: swrCustomers.mutate,
+        } : swrCustomers} columns={columns} />
       </Box>
     </SWRConfig >
   )
