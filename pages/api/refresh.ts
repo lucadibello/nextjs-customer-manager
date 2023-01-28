@@ -8,6 +8,7 @@ import { ApiResponse } from '../../lib/types/api'
 import { UserSession } from '../../lib/types/auth'
 import Joi from 'joi'
 import { joiMiddleware } from '../../middlewares/joi-middleware'
+import { logger } from '../../lib/logger'
 
 export type RefreshApiResponse = ApiResponse<{
   token: string
@@ -27,6 +28,8 @@ const refreshRoute = async (
 
   // If refresh token is not present, return a 400 response
   if (!refreshToken) {
+    logger.warn('[/api/refresh] Missing refresh token')
+
     return res.status(400).json({
       success: false,
       message: 'Missing refresh token',
@@ -51,17 +54,29 @@ const refreshRoute = async (
 
       // If user does not exist, return a 401 response
       if (!user) {
+        logger.warn(
+          `[/api/refresh] Refresh token for ${decoded.email} is invalid. Associated user does not exist`
+        )
+
         return res.status(401).json({
           success: false,
           message: 'Invalid refresh token',
         })
       } else if (user.RefreshToken != refreshToken) {
+        logger.warn(
+          `[/api/refresh] Refresh token for ${decoded.email} is invalid. refresh token mismatch`
+        )
+
         // If refresh token does not match, return a 401 response
         return res.status(401).json({
           success: false,
           message: 'Refresh token mismatch',
         })
       } else {
+        logger.info(
+          `[/api/refresh] Refresh token for ${decoded.email} is valid`
+        )
+
         const session: UserSession = {
           id: user.EmployeeId,
           email: user.Email,
@@ -82,10 +97,14 @@ const refreshRoute = async (
         })
       }
     } else {
+      logger.warn('[/api/refresh] Invalid refresh token signature or expired')
+
       // Trigger error manually
       throw new Error('Invalid refresh token')
     }
   } catch (e) {
+    logger.warn('[/api/refresh] Invalid refresh token')
+
     // If they don't match, return a 401 response
     return res.status(401).json({
       success: false,

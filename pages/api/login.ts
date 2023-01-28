@@ -8,6 +8,7 @@ import { LoginApiResponse } from '../login/login'
 import { Role } from '@prisma/client'
 import { joiMiddleware } from '../../middlewares/joi-middleware'
 import Joi from 'joi'
+import { logger } from '../../lib/logger'
 
 // Define JOI schema for request body
 const schema = Joi.object({
@@ -22,6 +23,8 @@ const loginRoute = async (
   // Extract email and password from request body
   const { email, password } = req.body as { email: string; password: string }
 
+  logger.info(`[/api/login] Login attempt for ${email}`)
+
   // Check if user exists in database
   const user = await prisma.employee.findUnique({
     where: {
@@ -31,6 +34,10 @@ const loginRoute = async (
 
   // If user does not exist, return a 401 response
   if (!user) {
+    logger.warn(
+      `[/api/login] Login attempt for ${email} failed. Invalid email.`
+    )
+
     return res.status(401).json({
       success: false,
       message: 'Invalid email or password',
@@ -49,6 +56,10 @@ const loginRoute = async (
 
       // generate access + refresh token
       const token = auth.generateAccessToken(session)
+
+      logger.info(
+        `[/api/login] Login attempt for ${email} succeeded. Role: ${session.role}`
+      )
 
       // Generate refresh token only for managers
       if (session.role == Role.MANAGER) {
@@ -83,6 +94,10 @@ const loginRoute = async (
         })
       }
     } else {
+      logger.warn(
+        `[/api/login] Login attempt for ${email} failed. Wrong password.`
+      )
+
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password',

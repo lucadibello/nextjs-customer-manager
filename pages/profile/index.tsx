@@ -232,7 +232,6 @@ const ProfilePage = () => {
       <Heading>Change password</Heading>
       <Divider mb={5} />
 
-      {/* Two fields, one to confirm the current password, and one to insert the new password */}
       <Box minWidth={"50%"}>
         <ChangePasswordForm
           isLoading={isPending}

@@ -40,7 +40,7 @@ const ChangePasswordForm = ({ onSuccess, isLoading }: IChangePasswordFormProps) 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <FormControl isInvalid={!!errors.newPassword}>
-        <FormLabel htmlFor="currentPassword">Current password</FormLabel>
+        <FormLabel htmlFor="newPassword">New password</FormLabel>
         <Controller
           name="newPassword"
           control={control}

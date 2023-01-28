@@ -6,6 +6,7 @@ Link to the italian version of this README: [README.it.md](./README.it.md)
 
 - NextJS v13
 - TypeScript
+- Progressive Web App (PWA) with [next-pwa](https://github.com/shadowwalker/next-pwa)
 - Chakra UI
 - React Hook Form
 - SWR (stale-while-revalidate)
@@ -44,6 +45,27 @@ This has been developed to be as intuitive as possible, so that the user can cre
 
 **Idle Timeout**
 a provider called "IdleProvider" was developed to manage the user's idle timeout. This provider was used to show a warning message to the user when the idle timeout was reached and to log out automatically when the idle timeout was exceeded.
+
+**User authentication challenge**
+Before performing sensitive operations, such as a password change, additional on-demand verification of the user's identity may be required via a username and password login.
+
+This feature does not require any changes to the current page/component as it is already implemented within the entire application via a react provider called [AuthChallengeProvider](providers/auth/challenge/AuthChallengeProvider.tsx) that wraps the entire application to show the login dialog when needed.
+
+After logging in, the provider returns an OTP code for the user to use to complete the requested operation. The code must be attached to the sensitive HTTP request, which will then be authorized only if the OTP code is valid.
+
+For example, when the user wants to change the password:
+
+![Change password](./docs/images/challenge/password-form.png)
+
+After clicking "Change password," the provider shows the login dialog:
+
+![Change password](./docs/images/challenge/challenge-modal.png)
+
+And, after logging in and receiving the OTP code, the user can change the password. The OTP code is currently returned by the server in the HTTP response, but in the future it may be sent via email or SMS.
+
+This is the complete flow:
+
+![Change password](./docs/images/challenge/challenge-flow.png)
 
 ### 1.1. Introduction
 
@@ -124,25 +146,24 @@ This webapp has a really minimal footprint, this is thanks to all the optimizati
 
 ```sh
 Route (pages)                              Size     First Load JS
-┌ λ /                                      34.9 kB         289 kB
-├   /_app                                  0 B             223 kB
-├ λ /404                                   6.78 kB         229 kB
-├ λ /api/challenge/start                   0 B             223 kB
-├ λ /api/change-password                   0 B             223 kB
-├ λ /api/customers                         0 B             223 kB
-├ λ /api/login                             0 B             223 kB
-├ λ /api/me                                0 B             223 kB
-├ λ /api/refresh                           0 B             223 kB
-├ ○ /login                                 1.4 kB          232 kB
-└ ○ /profile                               4.31 kB         259 kB
-+ First Load JS shared by all              223 kB
+┌ λ /                                      35.4 kB         331 kB
+├   /_app                                  0 B             264 kB
+├ λ /404                                   758 B           264 kB
+├ λ /api/challenge/start                   0 B             264 kB
+├ λ /api/change-password                   0 B             264 kB
+├ λ /api/customers                         0 B             264 kB
+├ λ /api/login                             0 B             264 kB
+├ λ /api/refresh                           0 B             264 kB
+├ ○ /login                                 1.4 kB          273 kB
+└ ○ /profile                               4.3 kB          300 kB
++ First Load JS shared by all              264 kB
   ├ chunks/framework-ffee79c6390da51e.js   45.7 kB
-  ├ chunks/main-972b3d2d3e6e8a7c.js        34.3 kB
-  ├ chunks/pages/_app-005bf9e1593bc12d.js  141 kB
+  ├ chunks/main-51cc0bf40f654238.js        34.2 kB
+  ├ chunks/pages/_app-0364b8dcefb6a0e8.js  182 kB
   ├ chunks/webpack-f4e692136d6f1094.js     1.48 kB
   └ css/ab44ce7add5c3d11.css               247 B
 
-ƒ Middleware                               29.6 kB
+ƒ Middleware                               29.3 kB
 
 λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
 ○  (Static)  automatically rendered as static HTML (uses no initial props)

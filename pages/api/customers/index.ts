@@ -6,23 +6,7 @@ import {
 } from '../../../middlewares/auth-middleware'
 import { prisma } from '../../../lib/db'
 import { CustomersApiResponse } from '../../../lib/types/apis/customers'
-
-export const fetchEmployeeCustomers = async (employeeId: number) => {
-  // Fetch all customers from database assigned to the current user
-  const customers = await prisma.customer.findMany({
-    where: {
-      SupportRepId: employeeId,
-    },
-  })
-
-  // Return customers as JSON
-  return {
-    success: true,
-    data: {
-      customers,
-    },
-  } as CustomersApiResponse
-}
+import { logger } from '../../../lib/logger'
 
 const customersRoute = async (
   req: NextApiRequestWithUser,
@@ -35,8 +19,10 @@ const customersRoute = async (
     },
   })
 
+  logger.info(`[/api/customers] Returning customers for user ${req.user.email}`)
+
   // Return customers as JSON
-  res.json({
+  return res.json({
     success: true,
     data: {
       customers,

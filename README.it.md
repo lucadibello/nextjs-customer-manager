@@ -6,6 +6,7 @@ Link al README in inglese: [README.md](./README.md)
 
 - NextJS v13
 - TypeScript
+- Progressive Web App (PWA) con [next-pwa](https://github.com/shadowwalker/next-pwa)
 - Chakra UI
 - React Hook Form
 - SWR (stale-while-revalidate)
@@ -40,11 +41,31 @@ Ogni riga rappresenta la query di ricerca di campo, dove è possibile selezionar
 
 ![Modular query builder dialog](./docs/images/modular_filters_example.png)
 
-
 Il tutto è stato sviluppato in modo da essere il più intuitivo possibile, in modo che l'utente possa creare query di ricerca personalizzate senza dover necessariamente conoscere la sintassi SQL.
 
 **Idle Timeout**
 è stato sviluppato un provider chiamato "IdleProvider" che permette di gestire il timeout di inattività dell'utente. Questo provider è stato utilizzato per mostrare un messaggio di avviso all'utente quando il tempo di inattività è stato raggiunto e per effettuare il logout automaticamente quando il tempo di inattività è stato superato.
+
+**User authentication challenge**
+Prima di eseguire operazioni sensibili, come ad esempio il cambio della password, può essere richiesta una verifica on-demand aggiuntiva sull'identità dell'utente tramite un login con username e password.
+
+Questa feature non richiede alcuna modifica alla pagina corrente / componente in quanto è già implementata all'interno dell'intera applicazione tramite un Provider di react chiamato [AuthChallengeProvider](providers/auth/challenge/AuthChallengeProvider.tsx) che wrappa l'intera applicazione per mostrare il dialog di login quando necessario.
+
+Dopo aver effettuato il login, il provider ritorna un codice OTP che dovrà utilizzare l'utente per completare l'operazione richiesta. Il codice deve essere allegato alla richiesta HTTP sensibile, che verrà quindi autorizzata solo se il codice OTP è valido.
+
+Per esempio, quando l'utente vuole cambiare la password:
+
+![Change password](./docs/images/challenge/password-form.png)
+
+Dopo aver cliccato su "Change password", il provider mostra il dialog di login:
+
+![Change password](./docs/images/challenge/challenge-modal.png)
+
+E, dopo aver effettuato il login ed aver ricevuto il codice OTP, l'utente può cambiare la password. Il codice OTP al momento è ritornato dal server nella risposta HTTP, ma in futuro potrebbe essere inviato tramite email o SMS.
+
+Questo è il flow completo:
+
+![Change password](./docs/images/challenge/challenge-flow.png)
 
 ### 1.1. Introduzione
 
