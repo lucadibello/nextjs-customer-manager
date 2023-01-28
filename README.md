@@ -385,7 +385,6 @@ Running the query, we get that the employee with the most customers is "*Jane Pe
 
 **Which customer has the most invoices (Invoice)?**
 
-
 Query to get the customer with the most invoices:
 
 ```sql

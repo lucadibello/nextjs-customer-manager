@@ -416,7 +416,3 @@ Alexandre Rocha,7
 
 <TRONCATO>
 ```
-
-## 4. Demo del progetto
-
-Il progetto è stato deployato su un server self-hosted a casa mia è può essere visitato al seguente indirizzo: <customer-manager.lucadibello.ch>
