@@ -128,7 +128,32 @@ Per ulteriori informazioni: <https://nextjs.org/docs/advanced-features/custom-er
 
 Durante tutto il processo di sviluppo della webapp è stato utilizzato [**ESLint**](https://eslint.org) per analizzare ed aiutare a identificare e correggere gli errori di codifica e i problemi di qualità del codice. È altamente personalizzabile e supporta una vasta gamma di plugin per adattarsi a diverse esigenze.
 
-Siccome ESLint non controlla possibili vulnerabilità di sicurezza, ho dovuto utilizzare un tool aggiuntivo per questo scopo. Ne esistono diversi, ma ho scelto [**Snyk**](https://snyk.io) perché è gratuito per progetti open source e perché è molto semplice da utilizzare.
+Siccome ESLint non controlla possibili vulnerabilità di sicurezza, ho dovuto utilizzare un tool aggiuntivo per questo scopo. Ne esistono diversi, ma ho scelto [**Snyk**](https://snyk.io) perché è gratuito per progetti open source e perché è molto semplice da utilizzare. Snyk permette di analizzare la codebase e le dipendenze di un progetto, per identificare eventuali vulnerabilità di sicurezza e fornire una soluzione per risolverle. Ho utilizzato l'integrazione di Snyk con GitHub, in modo da poter eseguire un analisi automatica ogni volta che viene effettuato un push su GitHub.
+
+Si può vedere come le uniche vulnerabilità di sicurezza trovate sono relative a pacchetti npm utilizzati nel progetto, mentre non sono state trovate vulnerabilità di sicurezza relative al codice scritto da me:
+
+![Snyk report](./docs/images/snyk_report.png)
+
+È possibile vedere più nello specifico quali sono le vulnerabilità di sicurezza trovate, cliccando sul file **package.json**:
+
+![Snyk report](./docs/images/snyk_report_2.png)
+
+Ogni vulnerabilità di sicurezza ha diversi attributi:
+
+- **Severity**: indica la gravità della vulnerabilità
+- **Priority**: indica la priorità con cui risolvere la vulnerabilità
+- **Fixability**: indica se è possibile risolvere la vulnerabilità con una patch o se è necessario aggiornare il package (fixable, partially fixable, unfixable)
+- **Exploit maturity**: indica se la vulnerabilità è stata già sfruttata o meno (mature, proof-of-concept, no-known-exploit)
+- **Status**: indica lo stato della vulnerabilità (open, patched, ignored)
+
+In totale sono state trovate 5 vulnerabilità di sicurezza di package npm (1 High severity, 4 Medium severity). Tramite Snyk è possibile creare delle Pull Request automatiche per risolvere le vulnerabilità trovate.
+Di queste vulnerabilità, **3 sono Proof-of-Concept e 2 sono No-known-exploit**.
+
+Purtroppo, per le due vulnerabilità con *maturity* a "No-known exploits" non è ancora disponibile una patch:
+
+![Snyk report](./docs/images/snyk_report_3.png)
+
+*Nota: in quanto ho un piano free, non è possibile esportare il report dello scan in formato PDF.*
 
 ### 1.10. Risk assessment
 
@@ -148,6 +173,68 @@ Non sono stati identificati rischi significativi ma possono essere identificati 
 - **Rischio 3 (MEDIO)**: Manca una protezione contro attacchi di tipo bruteforce. Se un attaccante potrebbe utilizzare un attacco di tipo bruteforce per provare un gran numero di combinazioni di password al fine di ottenere con la forza bruta (*bruteforce*) l'accesso all'account di un determinato utente. Per ovviare a questo rischio, si dovrebbe implementare un sistema di protezione contro gli attacchi di tipo bruteforce, come ad esempio l'utilizzo di un sistema di autenticazione a più fattori, la limitazione del numero di tentativi di accesso non riusciti (come fanno tutti gli smartphone) o la temporizzazione dell'accesso dopo un numero specifico di tentativi falliti.
 
 - **Rischio 4 (MEDIO)**: Gli attacchi DDoS sono attacchi che mirano a saturare il server con richieste in modo da impedire l'accesso ai servizi offerti dal server stesso. Questo potrebbe essere fatto richiamando un gran numero di volte una determinata API, oppure richiamando un gran numero di API diverse. Per ovviare a questo rischio, si dovrebbe implementare un sistema di protezione contro gli attacchi DDoS, come ad esempio l'utilizzo di un sistema di caching, l'utilizzo di un sistema di rate limiting o l'utilizzo di un sistema di protezione DDoS come ad esempio [Cloudflare](https://www.cloudflare.com/).
+
+### 1.11. Privacy
+
+#### 1.11.1. Possibili problemi di privacy
+
+I token JWT assegnati all'utente contengono informazioni sensibili, come ad esempio l'ID dell'utente, il nome dell'utente, l'indirizzo email dell'utente e il ruolo dell'utente. Queste informazioni possono essere utilizzate per identificare l'utente in modo univoco.
+
+Questo potrebbe essere un problema di privacy, in quanto l'utente potrebbe non voler che queste informazioni siano conosciute da terzi. Questi dati potrebbero essere anche utilizzati come vettore di attacco (ex: Social Engineering attraverso indirizzo E-Mail, Bruteforce, etc.).
+
+Questo problema potrebbe essere mitagato criptando il payload del token JWT, in modo da rendere impossibile la lettura del payload senza la chiave di decrittazione. Oppure utilizzando altri metodi di autenticazione come [IronSession](https://github.com/vvo/iron-session) (utilizza cookie cifrati per memorizzare le informazioni di sessione) oppure [OAuth](https://curity.io/resources/learn/privacy-and-gdpr/) (utilizza un token di accesso cifrato per memorizzare le informazioni di sessione).
+
+#### 1.11.2. Informazioni sensibili memorizzate nel database
+
+All'interno del database sono memorizzate diverse informazioni sensibili, sia degli *Employee* che dei relativi *Customers* (il database comprende molte più tabelle, però per questo progetto vengono tenute in considerazione solo queste due).
+
+Questi dati (tranne la password associata ad ogni *Employee* per accedere al sistema) sono memorizzati in chiaro nel database, in quanto non è stato implementato alcun sistema di protezione di queste informazioni.
+
+In particolare, sono memorizzati in chiaro i seguenti dati sensibili:
+
+- Nome, Cognome
+- Indirizzo E-Mail
+- Indirizzo di residenza
+- Azienda di appartenenza (Solo per *Customers*)
+- Numeri di telefono
+- Data di nascita e data di assunzione (Solo per *Employees*)
+
+In caso di data breach, le informazioni sensibili memorizzate nel database potrebbero essere esposte e utilizzate da terze parti per fini illeciti, come ad esempio il furto di identità, utilizzati per phishing, frodi finanziarie, atti di estorsione o anche stalking.
+
+Per prevenire questo tipo di fuga di dati, è possibile utilizzare tecniche di crittografia per proteggere le informazioni sensibili, in modo che non siano leggibili in chiaro nel database. Questo va affiancato a meccanismi di autenticazione a più fattori per garantire che solo utenti autorizzati abbiano accesso al database. Inoltre, è importante che i dati sensibili non siano memorizzati in modo permanente nel database, ma vengano eliminati o resi illeggibili non appena non sono più necessari.
+
+Un esempio recente è il data breach subito da Marriott International nel 2018, in cui informazioni personali di oltre 500 milioni di clienti, tra cui numeri di passaporto e indirizzi di residenza, sono state rubate. Un altro esempio è il data breach subito da Yahoo nel 2013, in cui informazioni personali di oltre 3 miliardi di utenti, tra cui password e indirizzi email, sono state rubate.
+
+È importante tenere presente che anche se si adottano tutte le misure di sicurezza necessarie, non si può mai essere completamente al sicuro da un data breach. Pertanto, è importante avere piani di emergenza in atto per gestire rapidamente e adeguatamente una violazione della sicurezza quando si verifica.
+
+#### 1.11.3. Classificazione informazioni sensibili
+
+Le informazioni sensibili salvate in chiaro nel database possono essere classificate in base alle necessità di trattamento come segue:
+
+- **Informazioni di identificazione personale:** Nome, Cognome, Indirizzo E-Mail, Indirizzo di residenza, Data di nascita (solo per employees). Queste informazioni sono essenziali per identificare una persona e possono essere utilizzate per l'accesso al sistema o per l'invio di informazioni importanti.
+
+- **Informazioni di contatto:** Numero di telefono. Queste informazioni sono utilizzate per contattare le persone per questioni relative al loro account o al loro ordine.
+  
+- **Informazioni aziendali:** Azienda di appartenenza (solo per i clienti). Queste informazioni possono essere utilizzate per personalizzare l'esperienza utente o per inviare offerte speciali.
+
+### 1.12.4. Possibili accorgimenti per ridurre il rischio
+
+Per migliorare il sistema e renderlo più resiliente a problemi di data breach, si possono adottare le seguenti misure:
+
+**Crittografare le informazioni sensibili:** Utilizzare un algoritmo di crittografia a chiave simmetrica o asimmetrica per criptare le informazioni sensibili, come i numeri di telefono e gli indirizzi e-mail.
+
+**Utilizzare un sistema di autenticazione a più fattori:** Utilizzare una combinazione di metodi di autenticazione, come la password e la verifica tramite SMS o e-mail, per proteggere l'accesso al sistema.
+Limitare l'accesso alle informazioni sensibili: Limitare l'accesso alle informazioni sensibili solo a coloro che ne hanno necessità per svolgere le loro funzioni.
+
+**Utilizzare un firewall:** Utilizzare un firewall per proteggere il sistema dalle minacce esterne.
+
+**Utilizzare un sistema di monitoraggio:** Utilizzare un sistema di monitoraggio per tenere traccia degli accessi al sistema e delle modifiche apportate alle informazioni sensibili.
+
+**Fare una revisione regolare dei permessi:** Fare una revisione regolare dei permessi per garantire che solo gli utenti autorizzati abbiano accesso alle informazioni sensibili.
+
+**Fare backup regolari:** Fare backup regolari delle informazioni sensibili per poterle ripristinare in caso di data breach.
+
+**Utilizzare un sistema di gestione degli incidenti:** Utilizzare un sistema di gestione degli incidenti per monitorare e gestire gli incidenti di sicurezza, come la perdita di dati sensibili.
 
 ## 3. Getting Started
 
@@ -205,9 +292,76 @@ bash ./prisma/sql/import-toolkit.sh nextjs-customer-auth ./prisma/sql/chinook-po
 yarn dev
 ```
 
-## 4. Risposta a domande richieste
+## 4. Domande database
 
-### 4.1 
+**Installate il database nel formato preferito e date un'occhiata ai dati delle entità Cliente e Dipendente: quanti record contengono?**
+
+Query per ottenere il numero di Employee:
+
+```sql
+/* COUNT HOW MANY EMPLOYEES ARE IN THE DATABASE */
+SELECT COUNT(*) FROM "Employee";
+```
+
+Query per ottenere il numero di Clienti:
+
+```sql
+/* COUNT HOW MANY CUSTOMERS ARE IN THE DATABASE */
+SELECT COUNT(*) FROM "Customer";
+```
+
+Eseguendo le query riportate sopra, si ottiene che il database contiene solo 8 dipendenti e 59 clienti.
+
+**Quale dipendente ha il maggior numero di clienti?**
+
+Query per ottenere il dipendente con il maggior numero di clienti:
+
+```sql
+/* CHECK WHOSE EMPLOYEE HAS THE MOST CUSTOMERS (CONCAT FirstName and LastName) */
+SELECT CONCAT(e."FirstName", ' ', e."LastName") AS "Employee Name", COUNT("CustomerId") AS "Number of Customers"
+FROM "Employee" e INNER JOIN "Customer" c
+    ON e."EmployeeId" = c."SupportRepId"
+    GROUP BY e."EmployeeId"
+    ORDER BY "Number of Customers" DESC
+    LIMIT 1;
+```
+
+Eseguendo la query, si ottiene che il dipendente con il maggior numero di clienti è "*Jane Peacock*".
+
+**Quale cliente ha il maggior numero di fatture (Invoice)?**
+
+
+Query per ottenere il cliente con il maggior numero di fatture:
+
+```sql
+/* CHECK WHOSE CUSTOMER HAS THE MOST INVOICES (CONCAT FirstName and LastName) */
+SELECT CONCAT(c."FirstName", ' ', c."LastName") AS "Customer Name", COUNT("InvoiceId") AS "Number of Invoices"
+FROM "Customer" c INNER JOIN "Invoice" i
+    ON c."CustomerId" = i."CustomerId"
+    GROUP BY c."CustomerId"
+    ORDER BY "Number of Invoices" DESC
+    LIMIT 1;
+```
+
+Con la seguente query risulta che il cliente con il maggior numero di fatture (*invoices*) è "*Robert Brown*", con un totale di 7 fatture.
+
+Questo non è essattamente il risultato corretto in quanto l'ultima istruzione "LIMIT 1" seleziona solo il primo record, ovvero il cliente con il maggior numero di fatture. Molti clienti hanno lo stesso numero di fatture, quindi per ottenere il risultato corretto, è necessario rimuovere l'ultima istruzione "LIMIT 1". Output:
+
+```csv
+Camille Bernard,7
+Hannah Schneider,7
+Martha Silk,7
+Enrique Muoz,7
+Mark Philips,7
+Heather Leacock,7
+Robert Brown,7
+Fernanda Ramos,7
+Leonie Köhler,7
+Frank Harris,7
+Alexandre Rocha,7
+
+<TRONCATO>
+```
 
 ## 4. Demo del progetto
 
