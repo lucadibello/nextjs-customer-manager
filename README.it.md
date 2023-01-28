@@ -1,5 +1,7 @@
 # NextJS Customer Manager
 
+Link al README in inglese: [README.md](./README.md)
+
 ## 0. Tech Stack
 
 - NextJS v13
