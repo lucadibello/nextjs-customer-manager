@@ -288,6 +288,7 @@ const CustomerQueryBuilder = ({ queryFields, onQueryGenerated }: CustomerQueryBu
       // Notify parent component of the generated filters (if any)
       filters.length > 0 && onQueryGenerated(filters)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentFields])
 
   return (

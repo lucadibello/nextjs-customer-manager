@@ -5,12 +5,11 @@
 // https://nextjs.org/docs/api-reference/next.config.js/introduction
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 const { withSentryConfig } = require('@sentry/nextjs');
-const { m } = require('framer-motion');
 const withPWA = require('next-pwa')({
   dest: "public",
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development', // Disable the service worker in development
+  disable: false, // Disable the service worker in development
 })
 
 /** @type {import('next').NextConfig} */
@@ -30,6 +29,7 @@ const nextConfig = {
     // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/#use-hidden-source-map
     // for more information.
     hideSourceMaps: true,
+    debug: true
   },
 
   env: {
@@ -53,4 +53,4 @@ const sentryWebpackPluginOptions = {
 
 // Make sure adding Sentry options is the last code to run before exporting, to
 // ensure that your source maps include changes from all other Webpack plugins
-module.exports = withPWA(withSentryConfig(nextConfig, sentryWebpackPluginOptions));
+module.exports = withSentryConfig(withPWA(nextConfig), sentryWebpackPluginOptions);

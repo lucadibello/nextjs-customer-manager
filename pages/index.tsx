@@ -15,6 +15,7 @@ import {
   PopoverHeader,
   Divider,
   Badge,
+  Skeleton,
 } from '@chakra-ui/react'
 import { Customer } from '@prisma/client'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -22,7 +23,7 @@ import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { FiFilter, FiRefreshCw } from 'react-icons/fi'
-import useSWR, { SWRConfig, SWRResponse } from 'swr'
+import useSWR, { SWRResponse } from 'swr'
 import CustomerQueryBuilder from '../components/CustomerQueryBuilder'
 import CustomerTable, { CustomerTableAvailableColumns, defaultColumns } from '../components/CustomerTable'
 import Navbar from '../components/Navbar'
@@ -48,52 +49,7 @@ const allPossibleColumns: CustomerTableAvailableColumns = [
   'Email',
 ]
 
-export const getServerSideProps = (context: GetServerSidePropsContext) => withAuth(context, async (token) => {
-  // Fetch posts from APIs
-  const url = new URL('/api/customers', process.env.APP_URL)
-
-  // Build API URL
-  const result = await fetch(url, {
-    headers: {
-      cookie: `token=${token}`,
-    }
-  })
-
-  // Check if response is not ok
-  if (!result.ok) {
-    return {
-      props: {
-        fallback: {
-          '/api/customers': {
-            success: false,
-            data: {
-              customers: [],
-            }
-          }
-        },
-      },
-    }
-  } else {
-    // Parse response
-    const response: CustomersApiResponse = await result.json()
-    return {
-      props: {
-        fallback: {
-          '/api/customers': {
-            success: true,
-            data: {
-              customers: response.data && response.data.customers ? response.data.customers : [],
-            }
-          },
-        },
-      },
-    }
-  }
-}, {
-  redirectTo: '/',
-  twoFactorEnabled: false,
-})
-
+export const getServerSideProps = (context: GetServerSidePropsContext) => withAuth(context)
 
 const SWRCustomerTable = ({ customers, columns }: { customers: SWRResponse<CustomersApiResponse>, columns: CustomerTableAvailableColumns }) => {
   if (customers.error) {
@@ -117,7 +73,7 @@ const SWRCustomerTable = ({ customers, columns }: { customers: SWRResponse<Custo
 
 const HomePage: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ fallback }) => {
+> = () => {
   const [showFilter, setShowFilter] = useState(false)
   const [columns, setColumns] = useState<CustomerTableAvailableColumns>(defaultColumns)
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
@@ -158,188 +114,191 @@ const HomePage: NextPage<
   }, [])
 
   return (
-    <SWRConfig value={{ fallback }}>
-      <Box marginTop={'60px'} p={6}>
-        <Navbar
-          homeURL="/"
-          rightComponent={
-            currentUser && [
-              <NavbarProfile
-                currentUser={currentUser}
-                onLogOut={() => {
-                  // log out
-                  logOut()
-                  // redirect to home page
-                  router.push('/')
-                }}
-                key="avatar"
-              />,
-            ]
-          }
-        />
-
-        <HStack>
-          <Heading>
-            View customers
-          </Heading>
-          <Box>
-            <Popover
-              isOpen={showFilter}
-              onClose={() => {
-                // Close popover
-                setShowFilter(false)
-
-                // Persist columns to local storage
-                localStorage.setItem('columns', JSON.stringify(columns))
+    <Box marginTop={'60px'} p={6}>
+      <Navbar
+        homeURL="/"
+        rightComponent={
+          currentUser && [
+            <NavbarProfile
+              currentUser={currentUser}
+              onLogOut={() => {
+                // log out
+                logOut()
+                // redirect to home page
+                router.push('/')
               }}
-              placement="auto-start"
-              closeOnBlur={true}
-            >
-              <PopoverTrigger>
-                <IconButton
-                  icon={<FiFilter />}
-                  aria-label="Settings"
-                  variant="ghost"
-                  onClick={() => setShowFilter(!showFilter)}
-                />
-              </PopoverTrigger>
-              <PopoverContent>
-                <PopoverArrow />
-                <PopoverCloseButton />
+              key="avatar"
+            />,
+          ]
+        }
+      />
 
-                <PopoverHeader>Columns</PopoverHeader>
+      <HStack>
+        <Heading>
+          View customers
+        </Heading>
+        <Box>
+          <Popover
+            isOpen={showFilter}
+            onClose={() => {
+              // Close popover
+              setShowFilter(false)
 
-                <PopoverBody>
-                  {/* List of checkboxes for each column */}
-                  {allPossibleColumns.map((column) => (
-                    <Box key={column}>
-                      <Checkbox
-                        isChecked={columns.includes(column)}
-                        disabled={columns.length === 1 && columns.includes(column)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            // Insert column at right position
-                            const index = allPossibleColumns.indexOf(column)
-                            const newColumns = [...columns]
-                            newColumns.splice(index, 0, column)
-                            setColumns(newColumns)
-                          } else {
-                            setColumns(columns.filter((c) => c !== column))
-                          }
-                        }}
-                      >
-                        {column}
-                      </Checkbox>
-                    </Box>
-                  ))}
-                </PopoverBody>
-              </PopoverContent>
-            </Popover>
-          </Box>
+              // Persist columns to local storage
+              localStorage.setItem('columns', JSON.stringify(columns))
+            }}
+            placement="auto-start"
+            closeOnBlur={true}
+          >
+            <PopoverTrigger>
+              <IconButton
+                icon={<FiFilter />}
+                aria-label="Settings"
+                variant="ghost"
+                onClick={() => setShowFilter(!showFilter)}
+              />
+            </PopoverTrigger>
+            <PopoverContent>
+              <PopoverArrow />
+              <PopoverCloseButton />
+
+              <PopoverHeader>Columns</PopoverHeader>
+
+              <PopoverBody>
+                {/* List of checkboxes for each column */}
+                {allPossibleColumns.map((column) => (
+                  <Box key={column}>
+                    <Checkbox
+                      isChecked={columns.includes(column)}
+                      disabled={columns.length === 1 && columns.includes(column)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          // Insert column at right position
+                          const index = allPossibleColumns.indexOf(column)
+                          const newColumns = [...columns]
+                          newColumns.splice(index, 0, column)
+                          setColumns(newColumns)
+                        } else {
+                          setColumns(columns.filter((c) => c !== column))
+                        }
+                      }}
+                    >
+                      {column}
+                    </Checkbox>
+                  </Box>
+                ))}
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
+        </Box>
+      </HStack>
+
+
+      <Box>
+        {swrCustomers.data && swrCustomers.data.data && swrCustomers.data.data.customers && (
+          <HStack>
+            {filtersEnabled && (
+              <Badge color={"green"}>Filters enabled</Badge>
+            )}
+            <Badge color={"green"}>Loaded: {swrCustomers.data.data.customers.length} rows</Badge>
+            <IconButton
+              icon={<FiRefreshCw />}
+              aria-label="Refresh"
+              size={"xs"}
+              variant={"ghost"}
+              isLoading={swrCustomers.isValidating}
+              onClick={() => {
+                // Mutate data
+                swrCustomers.mutate()
+                // Show toast
+                toast({
+                  title: 'Refreshed',
+                  description: 'Customers have been refreshed.',
+                  status: 'success',
+                  duration: 5000,
+                  isClosable: true,
+                })
+              }}
+            />
+          </HStack>
+        )}
+
+        {swrCustomers.error && (
+          <Badge color={"red"}>Error: {swrCustomers.error.message}</Badge>
+        )}
+      </Box>
+
+      <Divider borderBottomColor={"black"} marginTop={2} marginBottom={"20px"} />
+
+      { /* Additional settings */}
+      <Box marginTop={"20px"} marginBottom={10}>
+        <HStack>
+          <Heading size={"md"}>Modular filters</Heading>
+
+          {/* Toggle filters */}
+          <Checkbox
+            isChecked={showAdvancedFilters}
+            onChange={(e) => {
+
+              // If filters are enabled, reset filters
+              if (e.target.checked === false) {
+                setShowAdvancedFilters(false)
+              } else {
+                setShowAdvancedFilters(true)
+              }
+              setFiltersEnabled(false)
+            }}
+          >
+            Enable filters
+          </Checkbox>
         </HStack>
 
 
-        <Box>
-          {swrCustomers.data && swrCustomers.data.data && swrCustomers.data.data.customers && (
-            <HStack>
-              {filtersEnabled && (
-                <Badge color={"green"}>Filters enabled</Badge>
-              )}
-              <Badge color={"green"}>Loaded: {swrCustomers.data.data.customers.length} rows</Badge>
-              <IconButton
-                icon={<FiRefreshCw />}
-                aria-label="Refresh"
-                size={"xs"}
-                variant={"ghost"}
-                isLoading={swrCustomers.isValidating}
-                onClick={() => {
-                  // Mutate data
-                  swrCustomers.mutate()
-                  // Show toast
-                  toast({
-                    title: 'Refreshed',
-                    description: 'Customers have been refreshed.',
-                    status: 'success',
-                    duration: 5000,
-                    isClosable: true,
-                  })
-                }}
-              />
-            </HStack>
-          )}
-
-          {swrCustomers.error && (
-            <Badge color={"red"}>Error: {swrCustomers.error.message}</Badge>
-          )}
-        </Box>
-
-        <Divider borderBottomColor={"black"} marginTop={2} marginBottom={"20px"} />
-
-        { /* Additional settings */}
-        <Box marginTop={"20px"} marginBottom={10}>
-          <HStack>
-            <Heading size={"md"}>Modular filters</Heading>
-
-            {/* Toggle filters */}
-            <Checkbox
-              isChecked={showAdvancedFilters}
-              onChange={(e) => {
-
-                // If filters are enabled, reset filters
-                if (e.target.checked === false) {
-                  setShowAdvancedFilters(false)
-                } else {
-                  setShowAdvancedFilters(true)
-                }
-                setFiltersEnabled(false)
-              }}
+        <AnimatePresence>
+          {showAdvancedFilters && (
+            <Box
+              as={motion.div}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
             >
-              Enable filters
-            </Checkbox>
-          </HStack>
+              <Box>
+                <Text>Build your own query using this dynamic query builder.</Text>
 
+                <Box p={4}>
+                  <CustomerQueryBuilder
+                    queryFields={allPossibleColumns}
+                    onQueryGenerated={(dataFilters) => {
+                      if (dataFilters.length > 0 && swrCustomers.data && swrCustomers.data.data && swrCustomers.data.data.customers) {
+                        // Filter customers (valid if all dataFilters are true for a customer)
 
-          <AnimatePresence>
-            {showAdvancedFilters && (
-              <Box
-                as={motion.div}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-              >
-                <Box>
-                  <Text>Build your own query using this dynamic query builder.</Text>
+                        // Enable filters if disabled
+                        !filtersEnabled && setFiltersEnabled(true)
 
-                  <Box p={4}>
-                    <CustomerQueryBuilder
-                      queryFields={allPossibleColumns}
-                      onQueryGenerated={(dataFilters) => {
-                        if (dataFilters.length > 0 && swrCustomers.data && swrCustomers.data.data && swrCustomers.data.data.customers) {
-                          // Filter customers (valid if all dataFilters are true for a customer)
-
-                          // Enable filters if disabled
-                          !filtersEnabled && setFiltersEnabled(true)
-
-                          const filteredCustomers = swrCustomers.data.data.customers.filter((customer) => {
-                            console.log(customer, dataFilters.every((dataFilter) => dataFilter(customer)))
-                            return dataFilters.every((dataFilter) => dataFilter(customer))
-                          })
-                          // Set filtered customers
-                          setFilteredCustomers(filteredCustomers)
-                        } else {
-                          setFiltersEnabled(false)
-                          setFilteredCustomers([])
-                        }
-                      }}
-                    />
-                  </Box>
+                        const filteredCustomers = swrCustomers.data.data.customers.filter((customer) => {
+                          console.log(customer, dataFilters.every((dataFilter) => dataFilter(customer)))
+                          return dataFilters.every((dataFilter) => dataFilter(customer))
+                        })
+                        // Set filtered customers
+                        setFilteredCustomers(filteredCustomers)
+                      } else {
+                        setFiltersEnabled(false)
+                        setFilteredCustomers([])
+                      }
+                    }}
+                  />
                 </Box>
               </Box>
-            )}
-          </AnimatePresence>
-        </Box>
+            </Box>
+          )}
+        </AnimatePresence>
+      </Box>
 
-        {/* Actual data table */}
+      {/* Actual data table */}
+      <Skeleton
+        minHeight={"300px"}
+        isLoaded={!!swrCustomers.data && !!swrCustomers.data.data && !!swrCustomers.data.data.customers}
+      >
         <SWRCustomerTable customers={showAdvancedFilters && filtersEnabled ? {
           error: undefined,
           data: {
@@ -352,8 +311,8 @@ const HomePage: NextPage<
           isValidating: false,
           mutate: swrCustomers.mutate,
         } : swrCustomers} columns={columns} />
-      </Box >
-    </SWRConfig >
+      </Skeleton>
+    </Box >
   )
 }
 export default HomePage

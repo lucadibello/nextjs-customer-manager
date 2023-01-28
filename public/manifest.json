@@ -1,6 +1,6 @@
 {
-  "name": "Brutesales - A powerfull sales manager",
-  "short_name": "Brutesales",
+  "name": "Customer Manager - NextJS PWA",
+  "short_name": "CustomerManager",
   "theme_color": "#4a90e2",
   "background_color": "#fff",
   "display": "standalone",

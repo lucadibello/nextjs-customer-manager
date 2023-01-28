@@ -18,7 +18,7 @@ export type AuthOptions = {
 // Create a getServerSideProps utility function called "withAuth" to check user
 const withAuth = async <T extends Object = any>(
   { req, res }: GetServerSidePropsContext,
-  onSuccess: (_token?: string) => Promise<GetServerSidePropsResult<T>>,
+  onSuccess?: (_token?: string) => Promise<GetServerSidePropsResult<T>>,
   options: AuthOptions = {
     redirectTo: '/login',
     twoFactorEnabled: false,
@@ -47,8 +47,12 @@ const withAuth = async <T extends Object = any>(
       return redirectToLogin
     } else if (options.twoFactorEnabled) {
       return redirectToLogin
-    } else {
+    } else if (onSuccess) {
       return onSuccess(token.toString())
+    } else {
+      return {
+        props: {} as T,
+      }
     }
   } else {
     return redirectToLogin
