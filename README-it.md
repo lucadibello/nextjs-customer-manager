@@ -25,7 +25,7 @@
 ### 1.0. Features
 
 **Login/Logout**
-Ogni Employee può effettuare il login con le proprie credenziali (email e password) e può effettuare il logout. Ogni employee ha di default la password ``, la quale può essere cambiata nella pagina di profilo.
+Ogni Employee può effettuare il login con le proprie credenziali (email e password) e può effettuare il logout. Ogni employee ha di default la password `Jo5hu4!`, la quale può essere cambiata nella pagina di profilo.
 
 **Customer Management**
 Ogni Employee può visualizzare la lista dei propri clienti all'interno di una tabella. Questa tabella è paginata, ordinabile, filtrabile e permette all'utente di nascondere / mostrare le colonne che desidera.

@@ -25,7 +25,7 @@
 ### 1.0. Features
 
 **Login/Logout**
-Each Employee can log in with his/her credentials (email and password) and can log out. Each employee has the default password ``, which can be changed on the profile page.
+Each Employee can log in with his/her credentials (email and password) and can log out. Each employee has the default password `Jo5hu4!`, which can be changed on the profile page.
 
 **Customer Management**
 Each Employee can view the list of their customers within a table. This table is paged, sortable, filterable, and allows the user to hide/show the columns they want.
