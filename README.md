@@ -25,6 +25,10 @@ Want to start this project? See [Automatic configuration](#3.2.-automatic-config
 **Profile page**
 ![Profile page](./docs/images/profile.png)
 
+## 1.2. Project demo
+
+Video demo: ![Demo video](/docs/demo/demo.mp4)
+
 ## 2. Project description
 
 ### 2.1. Features

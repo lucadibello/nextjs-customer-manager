@@ -25,6 +25,10 @@ Per provare l'applicazione, vai al capitolo [Configurazione automatizzata](#3.2.
 **Profile page**
 ![Profile page](./docs/images/profile.png)
 
+## 1.2. Project demo
+
+Video demo: ![Demo video](/docs/demo/demo.mp4)
+
 ## 2. Descrizione del progetto
 
 ### 2.1. Features
