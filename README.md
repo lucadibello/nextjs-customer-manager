@@ -27,7 +27,7 @@ Want to start this project? See [Automatic configuration](#3.2.-automatic-config
 
 ## 1.2. Project demo
 
-Video demo: ![Demo video](/docs/demo/demo.mp4)
+[View demo video here](/docs/demo/demo.mp4)
 
 ## 2. Project description
 
