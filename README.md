@@ -2,7 +2,9 @@
 
 Link to the italian version of this README: [README.it.md](./README.it.md)
 
-## 0. Tech Stack
+Want to start this project? See [Automatic configuration](#3.2.-automatic-configuration) or [Manual configuration](#3.3.-manual-configuration) chapters.
+
+## 1. Tech Stack
 
 - NextJS v13
 - TypeScript
@@ -15,7 +17,7 @@ Link to the italian version of this README: [README.it.md](./README.it.md)
 - React Table v7
 - Pino logger (with [pino-pretty](https://github.com/pinojs/pino-pretty))
 
-## 0.1. Project screenshots
+## 1.1. Project screenshots
 
 **Home page**
 ![Home page](./docs/images/homepage.png)
@@ -23,9 +25,9 @@ Link to the italian version of this README: [README.it.md](./README.it.md)
 **Profile page**
 ![Profile page](./docs/images/profile.png)
 
-## 1. Project description
+## 2. Project description
 
-### 1.0. Features
+### 2.1. Features
 
 **Login/Logout**
 Each Employee can log in with his/her credentials (email and password) and can log out. Each employee has the default password `Jo5hu4!`, which can be changed on the profile page.
@@ -67,7 +69,7 @@ This is the complete flow:
 
 ![Change password](./docs/images/challenge/challenge-flow.png)
 
-### 1.1. Introduction
+### 2.2. Introduction
 
 This project was based on the result of the last project [NextJS JWT authentication boilerplate](https://github.com/lucadibello/nextjs-jwt-auth-boilerplate), which found interest from many users of NextJS, React, and related technologies (nearly 50 stars on GitHub).
 
@@ -84,7 +86,7 @@ Note: All features related to "two-factor authetication," which were already pre
 
 Note: All features related to "two-factor authetication," which were already present within the boilerplate, have been removed as not required by the project delivery.
 
-### 1.2. Implementazione tracciabilità errori ed operazioni
+### 2.3. Tracing errors and operations
 
 To implement the necessary traceability, I used a SaaS solution called [Sentry](http://sentry.io), a real-time error tracking tool that helps developers monitor and resolve crashes in real time. Through Sentry's dashboard, it is possible to both view all the errors occurring in the server (with the ability to filter errors by type, date, stack trace, etc...) and to view the operations performed by the server (e.g., login, logout, registration, etc...) and the API calls made by the client, also showing information such as how often the calls are made, response time, who made the call, etc...
 
@@ -94,13 +96,13 @@ For example, this screenshot shows information about the customers fetch API:
 
 I also added a custom logger to log the operations performed in the server, using the [pino](https://github.com/pinojs/pino) module and its plugin [pino-pretty](https://github.com/pinojs/pino-pretty) to make it more readable (by default Pino logs in JSON format).
 
-### 1.3. Fixes on boilerplate repository
+### 2.4. Fixes on boilerplate repository
 
 I added some features to the system to improve security by saving the JWT tokens in two different places: the **refresh token** inside the localStorage (accessible only by the client) and the other inside a cookie called "*token*" (accessible by both the client and the server as it is sent along with each request).
 
 Initially, the refresh token was stored within a cookie called "*refresh-token*," but it led to some security problems, such as the fact that the refresh token is accessible by both the client and the server, so if an attacker managed to access the cookie, he could use the refresh token to obtain a new access token and access protected resources.
 
-### 1.4. Progressive Web App implementation
+### 2.5. Progressive Web App implementation
 
 Finally, in order to give the user a *look and feel* similar to what the user would have using a real application, I decided to convert the project to a PWA ([Progressive Web App](https://web.dev/progressive-web-apps/)) to make it more like a native application by making it installable on various client devices (Laptop, PC, Table, Smartphone) and, for most functionality, running offline with the use of a [service worker](https://web.dev/learn/pwa/service-workers/).
 To do this, I used the next-pwa module, a NextJS plugin that allows you to easily add PWA functionality to your NextJS application. I also generated all the necessary maskable icons using [maskable.app](https://maskable.app/) and added the manifest.json file to the public folder, also fixing the middleware.ts file to allow the user to access the required files even when not logged in (by default, each page has protected access).
@@ -126,11 +128,11 @@ You can see that the PWA application to the user appears as a native application
 **Special character encoding problem**: The encoding problem is due to the fact that my PostgreSQL database was not configured correctly with UTF-8 encoding, so when I imported the data into the database, some special characters (such as apostrophe) were saved incorrectly.
 I decided not to fix this problem since the project is just an example to show how NextJS and TypeScript can be used to create a secure PWA, so how the data is saved is not the focus of the project.
 
-### 1.5 Server-side data validation
+### 2.6. Server-side data validation
 
-For server-side data validation, I used the [yup](https://github.com/jquense/yup) module, the most popular data validation library for JavaScript. I used this module to validate both data sent from the client to the server and data that is saved in the database.
+For server-side data validation, I used the [yup](https://github.com/jquense/yup) module, the most popular data validation library for JavaScript. I used this module to validate both data sent from the client to the server and data that is saved in the database. To simplify the validation process, I created a custom middleware ([JoiMiddleware](./middlewares/joi-middleware.ts)) that automatically validates the sent data based on a custom Joi schema.
 
-### 1.6. Performance
+### 2.7. Performance
 
 I performed a webapp performance assessment using Google's [Lighthouse](https://developers.google.com/web/tools/lighthouse) tool, which provides a report on performance, accessibility, SEO, and best practice for Progressive Web Apps.
 
@@ -140,7 +142,7 @@ This is the result:
 
 As you can see, the webapp has a very good score for accessibility and best practices, while for performance (i.e., page load time) and SEO, the score is a bit lower, but still acceptable. This is due to the fact that the purpose of this project is not to create a webapp with an excellent score regarding performance, but to create a webapp that meets the requirements of the project using state-of-the-art techniques, used at a professional level.
 
-## 1.7. Footprint webapp
+## 2.8. Footprint webapp
 
 This webapp has a really minimal footprint, this is thanks to all the optimizations performed during the project build (ex: code splitting, tree shaking, minification, etc...). This is the result of the 'yarn build` command:
 
@@ -173,13 +175,13 @@ NextJS offers many *enterprise level* features, in fact it is a Framework used b
 
 To get more information, this is the official documentation of NextJS, where it explains about the compiler and build process: <https://nextjs.org/docs/advanced-features/compiler>
 
-### 1.8. Error handling
+### 2.9. Error handling
 
 In addition to adding Sentry for error tracking, I also added a custom error page, which is shown when an unhandled error occurs. It is automatically shown by NextJS when an error is thrown that has not been handled.
 
 For more information: <https://nextjs.org/docs/advanced-features/custom-error-page>
 
-### 1.9. Code analysis
+### 2.10. Code analysis
 
 Throughout the webapp development process, [**ESLint**](https://eslint.org) was used to analyze and help identify and correct coding errors and code quality issues. It is highly customizable and supports a wide range of plugins to fit different needs.
 
@@ -210,9 +212,9 @@ Unfortunately, for the two vulnerabilities with *maturity* to "No-known exploits
 
 *Note: As I have a free plan, it is not possible to export the scan report in PDF format.*.
 
-### 1.10. Risk assessment
+### 2.11. Risk assessment
 
-#### 1.10.1. Major risks
+#### 2.11.1. Major risks
 
 The system is designed to be secure, reliable, and scalable. As the number of APIs is very limited and all requests forwarded to the server are first authenticated, authorized and finally validated, the attack surface is very limited.
 In addition, NextJS does not have the concept of REST APIs, but of [Serverless functions](https://vercel.com/docs/concepts/functions/serverless-functions), i.e., functions that run in an isolated environment and do not have access to the filesystem, so they cannot be used to perform [Server-Side Request Forgery](https://owasp.org/www-community/attacks/Server_Side_Request_Forgery) or [Code Injection](https://owasp.org/www-community/attacks/Code_Injection) type attacks.
@@ -229,9 +231,9 @@ No significant risks have been identified, but the following risks can be identi
 
 - **Risk 4 (MEDIUM)**: DDoS attacks are attacks that aim to saturate the server with requests so as to prevent access to the services offered by the server. This could be done by calling a specific API a large number of times, or by calling a large number of different APIs. To remedy this risk, a protection system against DDoS attacks should be implemented, such as using a caching system, using a rate limiting system, or using a DDoS protection system such as [Cloudflare](https://www.cloudflare.com/).
 
-### 1.11. Privacy.
+### 2.12. Privacy
 
-#### 1.11.1. Possible privacy issues
+#### 2.12.1. Possible privacy issues
 
 JWT tokens assigned to the user contain sensitive information, such as the user's ID, the user's name, the user's email address, and the user's role. This information can be used to uniquely identify the user.
 
@@ -239,7 +241,7 @@ This could be a privacy issue, as the user may not want this information to be k
 
 This problem could be mitagated by encrypting the payload of the JWT token, so that it is impossible to read the payload without the decryption key. Or by using other authentication methods such as [IronSession](https://github.com/vvo/iron-session) (uses encrypted cookies to store session information) or [OAuth](https://curity.io/resources/learn/privacy-and-gdpr/) (uses an encrypted access token to store session information).
 
-#### 1.11.2. Sensitive information stored in the database
+#### 2.12.2. Sensitive information stored in the database
 
 Various sensitive information is stored within the database, both of the *Employees* and their *Customers* (the database includes many more tables, however, for this project only these two are taken into account).
 
@@ -262,7 +264,7 @@ A recent example is the data breach suffered by Marriott International in 2018, 
 
 It is important to keep in mind that even if you take all the necessary security measures, you can never be completely safe from a data breach. Therefore, it is important to have contingency plans in place to quickly and adequately handle a security breach when it occurs.
 
-#### 1.11.3 Classification of sensitive information
+#### 2.12.3 Classification of sensitive information
 
 Sensitive information stored in plain text in the database can be classified according to processing needs as follows:
 
@@ -272,7 +274,7 @@ Sensitive information stored in plain text in the database can be classified acc
   
 - **Company information:** Company affiliation (for customers only). This information may be used to personalize the user experience or to send special offers.
 
-### 1.12.4. Possible steps to reduce risk
+### 2.12.4. Possible steps to reduce risk
 
 To improve the system and make it more resilient to data breach issues, the following steps can be taken:
 
@@ -299,9 +301,26 @@ Restrict access to sensitive information:Restrict access to sensitive informatio
 - Yarn v1.22.10 or higher
 - PostgreSQL v13.3 or higher
 
-### 3.2 Configuration
+### 3.2. Automatic Configuration
 
-#### 3.2.1 Installing Node.js packages
+Notice: This configuration uses Docker and Docker Compose to create a PostgreSQL container and run the application.
+
+#### 3.2.1. Install Docker and Docker Compose
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+#### 3.2.2. Run and seed the database
+
+This script will create both the Next.js application container and the PostgreSQL container, and will also seed the database with the data contained in the `prisma/sql/chinook-postgre.sql` file.
+
+```sh
+bash ./fresh-dockerized-start.sh
+```
+
+### 3.3. Manual Configuration
+
+#### 3.3.1 Installing Node.js packages
 
 ```sh
 yarn install
@@ -313,25 +332,25 @@ Or, if using `npm`:
 npm install
 ```
 
-#### 3.2.2. (Optional) Create a new Docker container for PostgreSQL
+#### 3.3.2. (Optional) Create a new Docker container for PostgreSQL
   
 ```sh
 docker run --name nextjs-customer-auth -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
 ```
 
-#### 3.2.3. Rename file `.env.example` to `.env` and change environment variables
+#### 3.3.3. Rename file `.env.example` to `.env` and change environment variables
 
 ```sh
 cp .env.example .env
 ```
 
-#### 3.2.4. Push database schema and additional seeding
+#### 3.3.4. Push database schema and additional seeding
   
 ```sh
 yarn prism db push
 ```
 
-### 3.2.5. Manual seeding of the database
+### 3.3.5. Manual seeding of the database
 
 Since the seeding script is huge (15631 entries) and it is difficult to manage it through Prism I preferred to use the `psql` command offered by PostgreSQL (much more performant).
 
@@ -341,7 +360,7 @@ To perform the seeding without worries / problems inside the Docker container cr
 bash ./prisma/sql/import-toolkit.sh nextjs-customer-auth ./prisma/sql/chinook-postgres.sql
 ```
 
-#### 3.2.5. Start the development server
+#### 3.3.6. Start the development server
 
 ```sh
 yarn dev
@@ -367,7 +386,7 @@ SELECT COUNT(*) FROM "Customer";
 
 Running the queries above results in the database containing only 8 employees and 59 customers.
 
-**Which employee has the most customers?
+**Which employee has the most customers?**
 
 Query to obtain the employee with the most customers:
 

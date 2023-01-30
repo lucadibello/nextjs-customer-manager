@@ -2,7 +2,9 @@
 
 Link al README in inglese: [README.md](./README.md)
 
-## 0. Tech Stack
+Per provare l'applicazione, vai al capitolo [Configurazione automatizzata](#3.2.-configurazione-automatizzata) o [Configurazione manuale](#3.3.-configurazione-manuale).
+
+## 1. Tech Stack
 
 - NextJS v13
 - TypeScript
@@ -15,7 +17,7 @@ Link al README in inglese: [README.md](./README.md)
 - React Table v7
 - Pino logger (with [pino-pretty](https://github.com/pinojs/pino-pretty))
 
-## 0.1. Screenshot progetto
+## 1.1. Screenshot progetto
 
 **Home page**
 ![Home page](./docs/images/homepage.png)
@@ -23,9 +25,9 @@ Link al README in inglese: [README.md](./README.md)
 **Profile page**
 ![Profile page](./docs/images/profile.png)
 
-## 1. Descrizione del progetto
+## 2. Descrizione del progetto
 
-### 1.0. Features
+### 2.1. Features
 
 **Login/Logout**
 Ogni Employee può effettuare il login con le proprie credenziali (email e password) e può effettuare il logout. Ogni employee ha di default la password `Jo5hu4!`, la quale può essere cambiata nella pagina di profilo.
@@ -67,7 +69,7 @@ Questo è il flow completo:
 
 ![Change password](./docs/images/challenge/challenge-flow.png)
 
-### 1.1. Introduzione
+### 2.2. Introduzione
 
 Questo progetto è stato basato sul risultato del progetto scorso [NextJS JWT authentication boilerplate](https://github.com/lucadibello/nextjs-jwt-auth-boilerplate), il quale ha riscontrato un interesse da parte di molti utenti utilizzatori di NextJS, React e tecnologie correlate (quasi 50 star su GitHub).
 
@@ -82,7 +84,7 @@ Ho dovuto eseguire queste modifiche al database Chinook per renderlo compatibile
 
 Nota: tutte le feature legate alla "two-factor authetication", le quali erano già presenti all'interno del boilerplate, sono state rimosse in quanto non richieste dalla consegna del progetto.
 
-### 1.2. Implementazione tracciabilità errori ed operazioni
+### 2.3. Implementazione tracciabilità errori ed operazioni
 
 Per implementare la tracciabilità necessarie, ho utilizzato una soluzione SaaS chiamata [Sentry](http://sentry.io), uno strumento di tracciamento degli errori in tempo reale che aiuta gli sviluppatori a monitorare e risolvere i crash in tempo reale. Attraverso la dashboard di Sentry, è possibile sia visualizzare tutti gli errori che si verificano nel server (con la possibilità di filtrare gli errori per tipo, data, stack trace, ecc...) sia visualizzare le operazioni svolte dal server (es: login, logout, registrazione, ecc...) e le chiamate API effettuate dal client, mostrando anche informazioni come la frequenza con cui vengono effettuate le chiamate, il tempo di risposta, chi ha effettuato la chiamata, ecc...
 
@@ -92,13 +94,13 @@ Per esempio, questo screenshot mostra le informazioni relative all'API per il fe
 
 Ho anche aggiunto un logger personalizzato per loggare le operazioni svolte nel server, utilizzando il modulo [pino](https://github.com/pinojs/pino) e il suo plugin [pino-pretty](https://github.com/pinojs/pino-pretty) per renderlo più leggibile (di default Pino logga in formato JSON).
 
-### 1.3. Fix problema di sicurezza
+### 2.4. Fix problema di sicurezza boilerplate
 
 Ho aggiunto alcune funzionalità al sistema per migliorare la sicurezza, salvando i token JWT in due posti diversi: il **refresh token** all'interno del localStorage (accessibile solo dal client) e l'altro all'interno di un cookie chiamato "*token*" (accessibile sia dal client che dal server in quanto inviato insieme ad ogni richiesta).
 
 Inizialmente il refresh token era salvato all'interno di un cookie chiamato "*refresh-token*", ma ha portato ad alcuni problemi di sicurezza, come ad esempio il fatto che il refresh token è accessibile sia dal client che dal server, quindi se un attaccante fosse riuscito ad accedere al cookie, avrebbe potuto utilizzare il refresh token per ottenere un nuovo access token e accedere alle risorse protette.
 
-### 1.4. Implementazione Progressive Web App
+### 2.5. Implementazione Progressive Web App
 
 Infine, per dare all'utente un *look and feel* simile a quello che l'utente avrebbe utilizzando una vera applicazione, ho deciso di convertire il progetto in una PWA ([Progressive Web App](https://web.dev/progressive-web-apps/)) per renderlo più simile a un'applicazione nativa rendendola installabile su vari dispositivi del client (Laptop, PC, Table, Smartphone) e, per la maggior parte delle funzionalità, funzionante offline con l'utilizzo di un [service worker](https://web.dev/learn/pwa/service-workers/).
 Per farlo, ho utilizzato il modulo next-pwa, un plugin di NextJS che consente di aggiungere facilmente funzionalità PWA alla propria applicazione NextJS. Ho anche generato tutte le icone mascherabili necessarie usando [maskable.app](https://maskable.app/) e ho aggiunto il file manifest.json alla cartella public, sistemando anche il file middleware.ts per consentire all'utente di accedere ai file richiesti anche quando non è loggato (per impostazione predefinita, ogni pagina ha accesso protetto).
@@ -124,11 +126,11 @@ Si può vedere che l'applicazione PWA all'utente appare come un'applicazione nat
 **Problema encoding caratteri speciali**: Il problema di codifica è dovuto dal fatto che il mio database PostgreSQL non è stato configurato correttamente con l'encoding UTF-8, quindi quando ho importato i dati nel database, alcuni caratteri speciali (come ad esempio l'apostrofo) sono stati salvati in modo errato.
 Ho deciso di non risolvere questo problema in quanto il progetto è solo un esempio per mostrare come si può utilizzare NextJS e TypeScript per creare una PWA sicura, quindi il come i dati sono salvati non è il punto focale del progetto.
 
-### 1.5 Validazione dati lato server
+### 2.6. Validazione dati lato server
 
-Per la validazione dei dati lato server, ho utilizzato il modulo [yup](https://github.com/jquense/yup), la libreria di validazione di dati più popolare per JavaScript. Ho utilizzato questo modulo per validare sia i dati inviati dal client al server, sia i dati che vengono salvati nel database.
+Per la validazione dei dati lato server, ho utilizzato il modulo [yup](https://github.com/jquense/yup), la libreria di validazione di dati più popolare per JavaScript. Ho utilizzato questo modulo per validare sia i dati inviati dal client al server, sia i dati che vengono salvati nel database. Per semplificare il processo di validazione, ho creato un middleware personalizzato ([JoiMiddleware](./middlewares/joi-middleware.ts)) che valida automaticamente i dati inviati in base ad uno schema Joi personalizzato passato come parametro al middleware.
 
-### 1.6. Performance
+### 2.7. Performance
 
 Ho eseguito un assessment della performance della webapp utilizzando il tool [Lighthouse](https://developers.google.com/web/tools/lighthouse) di Google, che fornisce un report sulle prestazioni, l'accessibilità, la SEO e la migliore pratica per le Progressive Web App.
 
@@ -138,7 +140,7 @@ Questo è il risultato:
 
 Come si può vedere, la webapp ha un ottimo score per quanto riguarda l'accessibilità e le best pratices, mentre per quanto riguarda le prestazioni (ovvero il tempo di caricamento della pagina) e la SEO, il punteggio è un po' più basso, ma comunque accettabile. Questo è dovuto al fatto che lo scopo di questo progetto non è quello di creare una webapp con un ottimo score per quanto riguarda le prestazioni, ma di creare una webapp che rispetti i requisiti richiesti dal progetto utilizzando tecniche state-of-the-art, utilizzate a livello professionale.
 
-## 1.7. Footprint webapp
+## 2.8. Footprint webapp
 
 Questa webapp ha un footprint veramente minimo, questo grazie a tutte le ottimizzazioni eseguite durante il build del progetto (es: code splitting, tree shaking, minificazione, etc...). Questo è il risultato del comando 'yarn build`:
 
@@ -172,13 +174,13 @@ NextJS offre molte funzionalità *enterprise level*, infatti è un Framework uti
 
 Per avere ulteriori informazioni, questa è la documentazione ufficiale di NextJS, dove spiega del compiler e del build process: <https://nextjs.org/docs/advanced-features/compiler>
 
-### 1.8. Error handling
+### 2.9. Error handling
 
 Oltre ad aver aggiunto Sentry per il tracking degli errori, ho anche aggiunto una pagina di errore personalizzata, che viene mostrata quando si verifica un errore non gestito. Essa viene mostrata in automatico da NextJS quando viene lanciato un errore che non è stato gestito.
 
 Per ulteriori informazioni: <https://nextjs.org/docs/advanced-features/custom-error-page>
 
-### 1.9. Code analysis
+### 2.10. Code analysis
 
 Durante tutto il processo di sviluppo della webapp è stato utilizzato [**ESLint**](https://eslint.org) per analizzare ed aiutare a identificare e correggere gli errori di codifica e i problemi di qualità del codice. È altamente personalizzabile e supporta una vasta gamma di plugin per adattarsi a diverse esigenze.
 
@@ -209,9 +211,9 @@ Purtroppo, per le due vulnerabilità con *maturity* a "No-known exploits" non è
 
 *Nota: in quanto ho un piano free, non è possibile esportare il report dello scan in formato PDF.*
 
-### 1.10. Risk assessment
+### 2.11. Risk assessment
 
-#### 1.10.1. Rischi principali
+#### 2.11.1. Rischi principali
 
 Il sistema è stato progettato per essere sicuro, affidabile e scalabile. In quanto il numero di API è molto limitato e tutte le richieste inoltrate al server vengono dapprima autenticate, autorizzate ed infine validate, la superficie di attacco è molto limitata.
 Inoltre, NextJS non ha il concetto di REST API, ma di [Serverless functions](https://vercel.com/docs/concepts/functions/serverless-functions), ovvero funzioni che vengono eseguite in un ambiente isolato e che non hanno accesso al filesystem, quindi non possono essere utilizzate per eseguire attacchi di tipo [Server-Side Request Forgery](https://owasp.org/www-community/attacks/Server_Side_Request_Forgery) oppure di tipo [Code Injection](https://owasp.org/www-community/attacks/Code_Injection).
@@ -228,9 +230,9 @@ Non sono stati identificati rischi significativi ma possono essere identificati 
 
 - **Rischio 4 (MEDIO)**: Gli attacchi DDoS sono attacchi che mirano a saturare il server con richieste in modo da impedire l'accesso ai servizi offerti dal server stesso. Questo potrebbe essere fatto richiamando un gran numero di volte una determinata API, oppure richiamando un gran numero di API diverse. Per ovviare a questo rischio, si dovrebbe implementare un sistema di protezione contro gli attacchi DDoS, come ad esempio l'utilizzo di un sistema di caching, l'utilizzo di un sistema di rate limiting o l'utilizzo di un sistema di protezione DDoS come ad esempio [Cloudflare](https://www.cloudflare.com/).
 
-### 1.11. Privacy
+### 2.12. Privacy
 
-#### 1.11.1. Possibili problemi di privacy
+#### 2.12.1. Possibili problemi di privacy
 
 I token JWT assegnati all'utente contengono informazioni sensibili, come ad esempio l'ID dell'utente, il nome dell'utente, l'indirizzo email dell'utente e il ruolo dell'utente. Queste informazioni possono essere utilizzate per identificare l'utente in modo univoco.
 
@@ -238,7 +240,7 @@ Questo potrebbe essere un problema di privacy, in quanto l'utente potrebbe non v
 
 Questo problema potrebbe essere mitagato criptando il payload del token JWT, in modo da rendere impossibile la lettura del payload senza la chiave di decrittazione. Oppure utilizzando altri metodi di autenticazione come [IronSession](https://github.com/vvo/iron-session) (utilizza cookie cifrati per memorizzare le informazioni di sessione) oppure [OAuth](https://curity.io/resources/learn/privacy-and-gdpr/) (utilizza un token di accesso cifrato per memorizzare le informazioni di sessione).
 
-#### 1.11.2. Informazioni sensibili memorizzate nel database
+#### 2.12.2. Informazioni sensibili memorizzate nel database
 
 All'interno del database sono memorizzate diverse informazioni sensibili, sia degli *Employee* che dei relativi *Customers* (il database comprende molte più tabelle, però per questo progetto vengono tenute in considerazione solo queste due).
 
@@ -261,7 +263,7 @@ Un esempio recente è il data breach subito da Marriott International nel 2018, 
 
 È importante tenere presente che anche se si adottano tutte le misure di sicurezza necessarie, non si può mai essere completamente al sicuro da un data breach. Pertanto, è importante avere piani di emergenza in atto per gestire rapidamente e adeguatamente una violazione della sicurezza quando si verifica.
 
-#### 1.11.3. Classificazione informazioni sensibili
+#### 2.12.3. Classificazione informazioni sensibili
 
 Le informazioni sensibili salvate in chiaro nel database possono essere classificate in base alle necessità di trattamento come segue:
 
@@ -271,7 +273,7 @@ Le informazioni sensibili salvate in chiaro nel database possono essere classifi
   
 - **Informazioni aziendali:** Azienda di appartenenza (solo per i clienti). Queste informazioni possono essere utilizzate per personalizzare l'esperienza utente o per inviare offerte speciali.
 
-### 1.12.4. Possibili accorgimenti per ridurre il rischio
+### 2.12.4. Possibili accorgimenti per ridurre il rischio
 
 Per migliorare il sistema e renderlo più resiliente a problemi di data breach, si possono adottare le seguenti misure:
 
@@ -298,9 +300,28 @@ Limitare l'accesso alle informazioni sensibili: Limitare l'accesso alle informaz
 - Yarn v1.22.10 or superiore
 - PostgreSQL v13.3 or superiore
 
-### 3.2 Configurazione
+### 3.2. Configurazione automatizzata
 
-#### 3.2.1 Installare pacchetti Node.js
+Avviso: Questa configurazione utilizza Docker e Docker Compose per creare un contenitore PostgreSQL ed eseguire l'applicazione.
+
+#### 3.2.1. Installare Docker e Docker Compose
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+#### 3.2.2. Eseguire e creare il database
+
+Questo script creerà sia il contenitore dell'applicazione Next.js sia il contenitore PostgreSQL, oltre a creare il database con i dati contenuti nel file `prisma/sql/chinook-postgre.sql`.
+
+```sh
+bash ./fresh-dockerized-start.sh
+```
+
+Tradotto con www.DeepL.com/Translator (versione gratuita)
+
+### 3.3. Configurazione manuale
+
+#### 3.3.1. Installare pacchetti Node.js
 
 ```sh
 yarn install
@@ -312,25 +333,25 @@ Oppure, se si utilizza `npm`:
 npm install
 ```
 
-#### 3.2.2. (Opzionale) Creare un nuovo container Docker per PostgreSQL
+#### 3.3.2. (Opzionale) Creare un nuovo container Docker per PostgreSQL
   
 ```sh
 docker run --name nextjs-customer-auth -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
 ```
 
-#### 3.2.3. Rinominare file `.env.example`  in `.env` e modificare le variabili d'ambiente
+#### 3.3.3. Rinominare file `.env.example`  in `.env` e modificare le variabili d'ambiente
 
 ```sh
 cp .env.example .env
 ```
 
-#### 3.2.4. Push schema database e seeding aggiuntivo
+#### 3.3.4. Push schema database e seeding aggiuntivo
   
 ```sh
 yarn prisma db push
 ```
 
-### 3.2.5. Seeding manuale del database
+### 3.3.5. Seeding manuale del database
 
 Dato che il lo script di seeding è enorme (15631 inserimenti) ed è difficile gestirlo attraverso Prisma ho preferito utilizzare il comando `psql` offerto da PostgreSQL (molto più performante).
 
@@ -340,7 +361,7 @@ Per eseguire il seeding senza preoccupazioni / problemi all'interno del containe
 bash ./prisma/sql/import-toolkit.sh nextjs-customer-auth ./prisma/sql/chinook-postgres.sql
 ```
 
-#### 3.2.5. Start the development server
+#### 3.3.6. Start the development server
 
 ```sh
 yarn dev

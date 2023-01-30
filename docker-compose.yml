@@ -1,23 +1,36 @@
 # Services:
 # - NextJS app (port 3000)
 # - Postgres app
-version: "3.7"
+version: "3.8"
 services:
   postgres:
-    container_name: db-nextjs-customer-auth-postgres
     image: postgres:latest
+    restart: always
+    container_name: postgres
     ports:
       - 5432:5432
+    expose:
+      - 5432
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - proxynet
   nextjs:
-    container_name: app-nextjs-customer-auth-nextjs
+    container_name: nextjs
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - 3000:3000
-    volumes:
-      - .:/app
+    expose:
+      - 3000
     depends_on:
       - postgres
+    networks:
+      - proxynet
+
+networks:
+  proxynet:
+    name: custom_network
