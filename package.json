@@ -13,7 +13,7 @@
     "@chakra-ui/react": "^2.3.7",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
-    "@prisma/client": "4.6.1",
+    "@prisma/client": "4.8.1",
     "@sentry/nextjs": "^7.28.1",
     "@tanstack/react-table": "^8.7.6",
     "@types/node": "^18.11.9",
