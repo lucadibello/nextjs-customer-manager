@@ -11,6 +11,12 @@ type User = {
   refreshToken: string
 }
 
+interface ChallengePayload {
+  id: number
+  email: string
+  challenge: string
+}
+
 export type StartChallengeApiResponse = ApiResponse<{
   challenge: string
 }>

@@ -1,7 +1,7 @@
 import { generateToken, verifyToken } from './jwt'
 
 import bcrypt from 'bcrypt'
-import { UserSession } from './types/auth'
+import { ChallengePayload, UserSession } from './types/auth'
 
 export const hashPassword = async (password: string): Promise<string> => {
   if (!process.env.AUTH_PASSWORD_HASH_ROUNDS) {
@@ -19,9 +19,20 @@ export const generateChallengeToken = (payload: UserSession): string => {
     throw new Error('JWT_CHALLENGE_TOKEN_EXPIRATION is not set')
   }
 
+  // Generate a random string of 24 characters
+  const challenge =
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+
+  const challengePayload: ChallengePayload = {
+    id: payload.id,
+    email: payload.email,
+    challenge: challenge,
+  }
+
   // Notice: expiration time is  for challenge token
-  return generateToken(
-    payload,
+  return generateToken<ChallengePayload>(
+    challengePayload,
     process.env.JWT_CHALLENGE_TOKEN_SECRET as string,
     process.env.JWT_CHALLENGE_TOKEN_EXPIRATION
   )
